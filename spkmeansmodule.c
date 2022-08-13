@@ -1,5 +1,14 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define DEBUG 0
+#define DEFAULT_MAX_ITER 300
+#define EPSILON 0.00001
+#define True 1
+#define False 0
 
 /*
  * python entry point function:
@@ -83,6 +92,264 @@ Vector getInverseMainDiagonal(Matrix ddg){
     return res;
 }
 
+
+void print_error(){
+    printf("An Error Has Occurred\n");
+}
+
+void print_invalid_input(){
+    printf("Invalid Input!\n");
+}
+
+/*
+ * This function gets a string of filename and returns the number of chars in the first line
+ */
+int getLineSize(char *filename){
+    FILE *fp = NULL;
+    int count = 0;
+    char c = 'a';
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        if (DEBUG ){
+            printf("in 'getLineSize', fp is null");
+        }
+        print_error();
+        return False;
+    }
+
+    c = fgetc(fp);
+    while (c != EOF && c!= '\n'){
+        c = fgetc(fp);
+        count++;
+    }
+    fclose(fp);
+    return count;
+}
+
+
+int getNumOfLines(char *filename){
+    FILE *fp = NULL;
+    int count = 0;
+    int c = 0;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        if (DEBUG == 1){
+            printf("in 'getNumOfLines', fp is null\n");
+        }
+        print_error();
+        return False;
+    }
+
+    while ( ( c = fgetc( fp ) ) != EOF )
+    {
+        count+= (c == '\n'); /* check if c equals '\n' */
+    }
+    fclose(fp);
+    return count;
+}
+
+
+/* returns number of numbers in first line of file */
+int get_dimension(char *in_file_path, int line_size){
+    FILE *fp = NULL;
+    char *line = NULL;
+    int counter = 1;
+    int i = 0;
+
+    fp = fopen(in_file_path, "r");
+    if (fp == NULL){
+        if (DEBUG == 1){
+            printf("in 'get_dimension', fp is null\n");
+        }
+        print_error();
+        return False;
+    }
+    line = (char  *) calloc(line_size, sizeof (char));
+    if (line == NULL){
+        if (DEBUG){
+            printf("in 'get_dimension', line is null\n");
+        }
+        print_error();
+        fclose(fp);
+        return False;
+    }
+    if(fgets(line, line_size, fp) == NULL){
+        fclose(fp);
+        if (DEBUG == 1){
+            printf("in 'get_dimension', fgets == null\n");
+        }
+        print_invalid_input();
+        free(line);
+        return False;
+    }
+
+    for(i = 0; line[i] != '\0'; i++ ){
+        if(line[i] == ','){
+            counter++;
+        }
+    }
+    fclose(fp);
+    free(line);
+    return counter;
+}
+
+
+int *getLinesLengths(int num_lines, char *filename){
+    int *linesLengths = NULL;
+    FILE *fp = NULL;
+    int i = 0;
+    char c = 0;
+    int line_len = 0;
+
+    linesLengths = (int *)calloc(num_lines,sizeof(int));
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        if (DEBUG == 1){
+            printf("in 'getLinesLengths', fp is null\n");
+        }
+        print_error();
+        return NULL;
+    }
+    if (linesLengths == NULL){
+        if (DEBUG == 1){
+            printf("in 'getLinesLengths', linesLengths is null\n");
+        }
+        fclose(fp);
+        print_error();
+        return NULL;
+    }
+    for(i = 0; i < num_lines; i++){
+        c = 0;
+        line_len = 1;
+        while((c = fgetc(fp)) != EOF){
+            if (c == '\n'){
+                linesLengths[i] = line_len;
+                break;
+            }
+            else{ line_len++;}
+        }
+    }
+    fclose(fp);
+    return linesLengths;
+}
+
+
+/* turns string of comma seperated numbers to array of doubles */
+double *str_to_vec(char *line,int line_len, int d){
+    double *res = NULL;
+    char *line_copy = NULL;
+    const char s[2] = ",";
+    char *token = NULL;
+    int i = 0;
+
+
+    res = (double *) calloc(d, sizeof(double));
+    line_copy = (char *) calloc(line_len+1, sizeof(char ));
+    strcpy(line_copy, line);
+    if(res == NULL){
+        if (DEBUG == 1){
+            printf("in 'str_to_vec', res is null\n");
+        }
+        print_error();
+        return NULL;
+    }
+
+
+    token = strtok(line_copy, s);
+    while( token != NULL ) {
+        res[i] = atof(token);
+        i++;
+        token = strtok(NULL, s);
+    }
+    free(line_copy);
+    return res;
+}
+
+
+int readData(char *in_file_path, double ***vectors, int *N, int *d){
+    int line_size = 0;
+    int i = 0;
+    char *line = NULL;
+    int *lines_length = NULL;
+    FILE *fp = NULL;
+    double *vec = NULL;
+
+
+    line_size = getLineSize(in_file_path);
+    if (!line_size){
+        return False;
+    }
+    *N = getNumOfLines(in_file_path);
+    if (!*N){
+        return False;
+    }
+    *d = get_dimension(in_file_path, line_size);
+    if(!*d){
+        if (DEBUG == 1){
+            printf("in 'readData', invalid input\n");
+        }
+        print_invalid_input();
+        return False;
+    }
+    *vectors = (double **)calloc(*N, sizeof(double  *));
+    if (*vectors == NULL){
+        if (DEBUG == 1){
+            printf("in 'readData', *vectors == NULL");
+        }
+        print_error();
+        return False;
+    }
+    line = (char  *) calloc(line_size + 1, sizeof (char));
+    if (line == NULL){
+        if (DEBUG){
+            printf("in 'get_dimension', line is null\n");
+        }
+        print_error();
+        return False;
+    }
+    lines_length = getLinesLengths(*N, in_file_path);
+    if (!lines_length){
+        return False;
+    }
+    fp = fopen(in_file_path, "r");
+    if (fp == NULL){
+        if (DEBUG == 1){
+            printf("in 'readData', fp is null\n");
+        }
+        print_error();
+        return False;
+    }
+
+    for(i=0; i < *N; i++){
+
+        (fgets(line, lines_length[i] + 1, fp));
+
+        vec = str_to_vec(line, lines_length[i], *d);
+
+        free(line);
+        if (i < (*N - 1)){
+            line =   (char *) calloc(lines_length[i+1] + 1, sizeof(char));
+
+        }
+
+        if(vec == NULL){
+            if (DEBUG == 1){
+                printf("in 'readData', vec==NULL");
+            }
+            print_error();
+            fclose(fp);
+            free(lines_length);
+            free(line);
+            return False;
+        }
+        (*vectors)[i] = vec;
+    }
+    fclose(fp);
+    free(lines_length);
+    return True;
+}
 
 /* execution functions: */
 
