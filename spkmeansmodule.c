@@ -351,6 +351,19 @@ int readData(char *in_file_path, double ***vectors, int *N, int *d){
     return True;
 }
 
+/* This function takes a matrix of numbers as formatted strings and prints
+their value to screen */
+int PrintData(char ***vec_strs){
+    int i = 0; int j = 0;
+    for(i=0; i < k_const; i++){
+        for(j=0; j < d_const -1; j++){
+            printf("%s,", vec_strs[i][j]);
+        }
+        printf("%s\n", vec_strs[i][d_const-1]);
+    }
+    return True;
+}
+
 /* execution functions: */
 
 Matrix executeWam(Matrix vectors){
