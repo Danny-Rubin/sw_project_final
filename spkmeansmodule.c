@@ -349,6 +349,60 @@ int readData(char *in_file_path, double ***vectors){
     return True;
 }
 
+
+char *doubleToRoundStr(double num){
+    char *res = NULL;
+
+    res = (char *) calloc(400, sizeof (char));
+    if(res == NULL){
+        return NULL;
+    }
+    sprintf(res, "%.4f", num);
+    return res;
+}
+
+/* This function takes a matrix of doubles and converts
+* it to a matrix of strings, formatted to 4 decimal places.
+*/
+char ***doubleVecsToStr(Matrix vectors, int d, int k){
+    char ***res = NULL;
+    int i = 0;
+    int j = 0;
+
+    res = (char ***) calloc(k_const, sizeof(char **));
+    if (res == NULL){
+        if (DEBUG) {
+            printf("error in doubleVecsToSt: res is null\n");}
+        print_error();
+        return NULL;
+    }
+    for(i=0; i < k_const; i++) {
+        res[i] = (char **) calloc(d_const, sizeof (char*));
+
+        if (res[i] == NULL){
+            if (DEBUG) {printf("error in doubleVecsToSt: res[%d] is null\n", i);}
+
+            for(j = 0; j < i; j++){
+                free(res[j]);
+            }
+            free(res);
+            print_error();
+            return NULL;
+        }
+    }
+    for(i=0; i < k_const; i++){
+        for(j=0; j < d_const; j++) {
+            char *val= doubleToRoundStr(vectors[i][j]);
+            if(val == NULL){
+                print_error();
+                return NULL;
+            }
+            res[i][j] = val;
+        }
+    }
+    return res;
+}
+
 /* This function takes a matrix of numbers as formatted strings and prints
 their value to screen */
 int PrintData(char ***vec_strs){
