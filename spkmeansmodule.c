@@ -97,6 +97,7 @@ void print_error(){
     printf("An Error Has Occurred\n");
 }
 
+
 void print_invalid_input(){
     printf("Invalid Input!\n");
 }
