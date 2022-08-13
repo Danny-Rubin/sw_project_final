@@ -364,7 +364,7 @@ char *doubleToRoundStr(double num){
 /* This function takes a matrix of doubles and converts
 * it to a matrix of strings, formatted to 4 decimal places.
 */
-char ***doubleVecsToStr(Matrix vectors, int d, int k){
+char ***doubleVecsToStr(Matrix vectors){
     char ***res = NULL;
     int i = 0;
     int j = 0;
