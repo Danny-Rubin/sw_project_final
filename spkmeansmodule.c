@@ -101,9 +101,7 @@ void print_invalid_input(){
     printf("Invalid Input!\n");
 }
 
-/*
- * This function gets a string of filename and returns the number of chars in the first line
- */
+/* get a string of filename and returns the number of chars in the first line */
 int getLineSize(char *filename){
     FILE *fp = NULL;
     int count = 0;
@@ -237,15 +235,15 @@ int *getLinesLengths(int num_lines, char *filename){
 
 
 /* turns string of comma seperated numbers to array of doubles */
-double *str_to_vec(char *line,int line_len, int d){
-    double *res = NULL;
+Vector str_to_vec(char *line,int line_len, int d){
+    Vector res = NULL;
     char *line_copy = NULL;
     const char s[2] = ",";
     char *token = NULL;
     int i = 0;
 
 
-    res = (double *) calloc(d, sizeof(double));
+    res = (Vector) calloc(d, sizeof(double));
     line_copy = (char *) calloc(line_len+1, sizeof(char ));
     strcpy(line_copy, line);
     if(res == NULL){
@@ -268,7 +266,7 @@ double *str_to_vec(char *line,int line_len, int d){
 }
 
 
-int readData(char *in_file_path, double ***vectors, int *N, int *d){
+int readData(char *in_file_path, double ***vectors){
     int line_size = 0;
     int i = 0;
     char *line = NULL;
@@ -281,19 +279,19 @@ int readData(char *in_file_path, double ***vectors, int *N, int *d){
     if (!line_size){
         return False;
     }
-    *N = getNumOfLines(in_file_path);
-    if (!*N){
+    n_const = getNumOfLines(in_file_path);
+    if (!n_const){
         return False;
     }
-    *d = get_dimension(in_file_path, line_size);
-    if(!*d){
+    d_const = get_dimension(in_file_path, line_size);
+    if(!d_const){
         if (DEBUG == 1){
             printf("in 'readData', invalid input\n");
         }
         print_invalid_input();
         return False;
     }
-    *vectors = (double **)calloc(*N, sizeof(double  *));
+    *vectors = (double **)calloc(n_const, sizeof(double  *));
     if (*vectors == NULL){
         if (DEBUG == 1){
             printf("in 'readData', *vectors == NULL");
@@ -309,7 +307,7 @@ int readData(char *in_file_path, double ***vectors, int *N, int *d){
         print_error();
         return False;
     }
-    lines_length = getLinesLengths(*N, in_file_path);
+    lines_length = getLinesLengths(n_const, in_file_path);
     if (!lines_length){
         return False;
     }
@@ -322,14 +320,14 @@ int readData(char *in_file_path, double ***vectors, int *N, int *d){
         return False;
     }
 
-    for(i=0; i < *N; i++){
+    for(i=0; i < n_const; i++){
 
         (fgets(line, lines_length[i] + 1, fp));
 
-        vec = str_to_vec(line, lines_length[i], *d);
+        vec = str_to_vec(line, lines_length[i], d_const);
 
         free(line);
-        if (i < (*N - 1)){
+        if (i < (n_const - 1)){
             line =   (char *) calloc(lines_length[i+1] + 1, sizeof(char));
 
         }
@@ -391,6 +389,7 @@ Matrix executeDdg(Matrix vectors, Matrix wam){
     }
     return res;
 }
+
 
 Matrix executeLnorm(Matrix vectors){
     Matrix wam = executeWam(vectors);
