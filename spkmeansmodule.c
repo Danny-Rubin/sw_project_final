@@ -3,12 +3,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "spkmeansmodule.h"
 
 #define DEBUG 1
 #define DEFAULT_MAX_ITER 300
 #define EPSILON 0.00001
 #define True 1
 #define False 0
+
+/* global variables of the program: number of vectors, number of clusters and input vectors dimension */
+
+int n_const = 0;
+int k_const = 0;
+int d_const = 0;
+
+typedef double** Matrix;
+typedef double* Vector;
+
+
 
 /*
  * python entry point function:
@@ -26,14 +38,27 @@
  * what it does: reads input file and calls appropriate execution function and then print to screen result
  */
 
-/* global variables of the program: number of vectors, number of clusters and input vectors dimension */
 
-int n_const = 0;
-int k_const = 0;
-int d_const = 0;
 
-typedef double** Matrix;
-typedef double* Vector;
+int readData(char *in_file_path, Matrix *vectors);
+Matrix executeDdg(Matrix vectors, Matrix wam);
+Matrix executeLnorm(Matrix vectors);
+Matrix executeWam(Matrix vectors);
+void printDoubleMatrix(Matrix mat, int rows, int cols);
+int PrintData(char ***vec_strs, int rows, int cols);
+
+
+
+
+// "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
+int cEntryPoint(int k, char* goal, char * fileName){
+    Matrix* matrix = (Matrix *) calloc(sizeof (Matrix), 1);
+    readData(fileName, matrix);
+    Matrix res = executeDdg(*matrix, NULL);
+    printDoubleMatrix(res, n_const, n_const);
+    return 0;
+}
+
 
 
 /*
@@ -472,13 +497,5 @@ Matrix executeLnorm(Matrix vectors){
     return res;
 }
 
-
-int main(int argc, char *argv[]){
-    Matrix* matrix = (Matrix *) calloc(sizeof (Matrix), 1);
-    readData("/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt", matrix);
-    Matrix res = executeDdg(*matrix, NULL);
-    printDoubleMatrix(res, n_const, n_const);
-    return 0;
-}
 
 
