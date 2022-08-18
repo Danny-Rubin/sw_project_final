@@ -53,7 +53,13 @@ int PrintData(char ***vec_strs, int rows, int cols);
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
     Matrix* matrix = (Matrix *) calloc(sizeof (Matrix), 1);
-    readData(fileName, matrix);
+    if(!readData(fileName, matrix)){
+        return 1;
+    }
+
+
+
+
     Matrix res = executeDdg(*matrix, NULL);
     printDoubleMatrix(res, n_const, n_const);
     return 0;
