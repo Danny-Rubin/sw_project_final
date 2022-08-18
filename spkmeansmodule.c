@@ -41,27 +41,53 @@ typedef double* Vector;
 
 
 int readData(char *in_file_path, Matrix *vectors);
+Matrix executeWam(Matrix vectors);
 Matrix executeDdg(Matrix vectors, Matrix wam);
 Matrix executeLnorm(Matrix vectors);
-Matrix executeWam(Matrix vectors);
+Matrix executeJacobi(Matrix vectors);
+void executeSpk(Matrix vectors);
 void printDoubleMatrix(Matrix mat, int rows, int cols);
 int PrintData(char ***vec_strs, int rows, int cols);
+int validateGoal(char *goal);
 
 
 
 
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
-    Matrix* matrix = (Matrix *) calloc(sizeof (Matrix), 1);
-    if(!readData(fileName, matrix)){
+    Matrix* matrixPtr = (Matrix *) calloc(sizeof (Matrix), 1); // @TODO: check if fails!!!
+    Matrix res = NULL;
+    if (!validateGoal(goal)){
         return 1;
     }
-
-
-
-
-    Matrix res = executeDdg(*matrix, NULL);
-    printDoubleMatrix(res, n_const, n_const);
+    if(!readData(fileName, matrixPtr)){
+        return 1;
+    }
+    switch (goal[0]) {
+        case 'w':
+            res = executeWam(*matrixPtr);
+            printDoubleMatrix(res, n_const, n_const);
+            break;
+        case 'd':
+            res = executeDdg(*matrixPtr, NULL);
+            printDoubleMatrix(res, n_const, n_const);
+            break;
+        case 'l':
+            res = executeLnorm(*matrixPtr);
+            printDoubleMatrix(res, n_const, n_const);
+            break;
+        case 'j':
+            res = executeJacobi(*matrixPtr);
+            // @todo: implement and print
+            break;
+        case 's':
+            executeSpk(*matrixPtr);
+            // @todo: write to file
+            break;
+        default:
+            print_error();
+            return 1;
+    }
     return 0;
 }
 
@@ -74,6 +100,27 @@ int cEntryPoint(int k, char* goal, char * fileName){
 /*
  * @TODO: add allocation validation
  */
+
+// @TODO: implement
+/* this function validates that the goal input is legal*/
+int validateGoal(char *goal);
+
+/* this function takes a matrix and checks if it's symmetric */
+int validateMatrixSymmetric(Matrix matrix, int rows, int cols){
+    int i = 0, j = 0;
+    /* if the matrix is not square: */
+    if (rows != cols){
+        return False;
+    }
+    for (i = 0; i < rows; i++){
+        for (j = 0; j < cols; j++){
+            if (matrix[i][j] != matrix[j][i]){
+                return False;
+            }
+        }
+    }
+    return True;
+}
 
 
 Vector allocateVector(int n){
@@ -502,6 +549,10 @@ Matrix executeLnorm(Matrix vectors){
     }
     return res;
 }
+
+Matrix executeJacobi(Matrix vectors);
+
+void executeSpk(Matrix vectors);
 
 
 

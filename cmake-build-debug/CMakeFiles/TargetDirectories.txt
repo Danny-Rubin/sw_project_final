@@ -1,3 +1,3 @@
-/Users/drubinov/Downloads/sw_project_final/cmake-build-debug/CMakeFiles/sw_project_final.dir
-/Users/drubinov/Downloads/sw_project_final/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/drubinov/Downloads/sw_project_final/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/t-noamavidor/CLionProjects/sw_project_final/cmake-build-debug/CMakeFiles/sw_project_final.dir
+C:/Users/t-noamavidor/CLionProjects/sw_project_final/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/t-noamavidor/CLionProjects/sw_project_final/cmake-build-debug/CMakeFiles/rebuild_cache.dir
