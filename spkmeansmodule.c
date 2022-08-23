@@ -57,11 +57,11 @@ int isConvergedJacobi(Matrix mat, Matrix matPrime);
 
 Matrix getIdentityMat(int dim);
 // return rotated mat and mutate cumpum to new cumpum
-Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
+void doJacobiIteration(Matrix mat, Matrix cumPum);
 Vector getIandJ(Matrix mat, int dim);
-Vector getCandS(Matrix mat, int dim, int i, int j);
+Vector getCandS(Matrix mat, int i, int j);
 void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
-Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
+void rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 Matrix copyOf(Matrix mat, int dim);
 
 
@@ -97,6 +97,15 @@ int cEntryPoint(int k, char* goal, char * fileName){
                 return 1;
             }
             jacobiRes = executeJacobi(*matrixPtr);
+
+            //             Matrix eigenValsMat = calloc(1, sizeof(Vector));
+            //             if(!eigenValsMat){
+            //                 print_error();
+            //                 return 1;
+            //                 }
+            //             eigenValsMat[0] = jacobiRes.eigenVals;
+            printDoubleMatrix(&jacobiRes.eigenVals, 1, n_const); // Todo check that print format is good, e.g spaces
+            printDoubleMatrix(jacobiRes.eigenVecs, n_const, n_const);
             // @todo: implement and print
             break;
         case 's':
@@ -122,7 +131,9 @@ int cEntryPoint(int k, char* goal, char * fileName){
 
 // @TODO: implement
 /* this function validates that the goal input is legal*/
-int validateGoal(char *goal);
+int validateGoal(char *goal){
+    return 1;
+}
 
 /* this function takes a matrix and checks if it's symmetric */
 int validateMatrixSymmetric(Matrix matrix, int rows, int cols){
@@ -170,6 +181,8 @@ Matrix allocateMatrix(int rows, int cols){
 }
 
 
+
+
 double sum(Vector vector, int n){
     int i = 0;
     double res = 0;
@@ -211,12 +224,12 @@ Vector getMainDiagonal(Matrix mat){
     return res;
 }
 
-void free_memory_arr(double** arr, int n){
+void freeMatrix(Matrix mat, int n){
     int i = 0;
     for(i = 0; i < n; i++){
-        free(arr[i]);
+        free(mat[i]);
     }
-    free(arr);
+    free(mat);
 }
 
 
@@ -626,10 +639,9 @@ Matrix executeLnorm(Matrix vectors){
 }
 
 
-Matrix getIdentityMat(int dim);
 
 // return rotated mat and mutate cumpum to new cumpum
-Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
+void doJacobiIteration(Matrix mat, Matrix cumPum);
 
 /*
  * This function calculates the row and column (i and j) of the off-diagonal element
@@ -656,12 +668,12 @@ Vector getIandJ(Matrix mat, int dim){
  * this function calculates the values of c and s parameters of the rotation matrix
  * based on the known formulas, and returns them in a double pointer
  */
-Vector getCandS(Matrix mat, int dim, int i, int j){
+Vector getCandS(Matrix mat, int i, int j) {
     Vector res = allocateVector(2);
-    double theta = (mat[j][j]- mat[i][i])/(2 * mat[i][j]);
-    int signTheta = theta < 0 ? -1 : 1;
+    double theta = (mat[j][j]- mat[i][i])/(2 * mat[i][j]); // Todo: handle mat[i][j] = 0
+    double signTheta = theta < 0 ? -1 : 1;
     double t =  signTheta / (fabs(theta) + sqrt(pow(theta,2) + 1));
-    double c = 1 / sqrt(pow(t,2) + 1);
+    double c = 1.0 / sqrt(pow(t,2) + 1);
     double s = t * c;
     res[0] = c;
     res[1] = s;
@@ -680,50 +692,65 @@ Matrix copyOf(Matrix mat, int dim){
 }
 
 
-Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
+void rotateMat(Matrix mat, int dim, int i, int j, double c, double s){
+    int r = 0;
+    Matrix copy = copyOf(mat, dim);
+    for (r = 0; r < dim; r++){
+        mat[r][i] = mat[i][r] = c * copy[r][i] - s * copy[r][j];
+        mat[r][j] = mat[j][r] =  c * copy[r][j] + s * copy[r][i];
+    }
+    mat[i][i] = pow(c, 2) * copy[i][i] + pow(s, 2) * copy[j][j] - 2 * s * c * copy[i][j];
+    mat[j][j] = pow(s, 2) * copy[i][i] + pow(c, 2) * copy[j][j] + 2 * s * c * copy[i][j];
+    mat[i][j] = mat[j][i] = 0;
+    freeMatrix(copy, dim);
+}
 
-Matrix doJacobiIteration(Matrix mat, Matrix cumPum){
+void doJacobiIteration(Matrix mat, Matrix cumPum){
     int i, j;
     double c, s;
     Vector iAndJ = getIandJ(mat, n_const);
     i = (int) iAndJ[0];
     j = (int) iAndJ[1];
-    int * cAndS = getCandS(mat, n_const);
+    Vector cAndS = getCandS(mat, i, j);
     c = cAndS[0];
     s = cAndS[1];
     updateCumpum(cumPum, n_const, i, j, c, s);
-    return rotateMat(mat, n_const, i, j, c, s);
+    rotateMat(mat, n_const, i, j, c, s);
+    return;
 }
 
+/* updates by mutation cumulative multiplication of P's */
 void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s){
     int count = 0;
-    Matrix res = cumPum;
+    Matrix copy = copyOf(cumPum, dim);
     for(count = 0; count < dim; count++){
-        res[count][i] = (c * res[count][i]) - (s * res[count][j]);
+        cumPum[count][i] = (c * copy[count][i]) - (s * copy[count][j]);
     }
     for(count = 0; count < dim; count++){
-        res[count][j] = (s * res[count][i]) - (s * res[count][j]);
+        cumPum[count][j] = (s * copy[count][i]) - (s * copy[count][j]);
     }
-
+    freeMatrix(copy, dim);
 }
 
 
 JacobiRes executeJacobi(Matrix vectors){
-    int i = 0, rotations_converged = 0;
+    int i = 0, rotations_converged = False;
+    JacobiRes res = {.eigenVals = NULL, .eigenVecs = NULL}; // todo watch this for merrors
     Matrix A = vectors;
-    Matrix A_prime = NULL;
+    Matrix A_prime = copyOf(A, n_const);
+    Matrix cumPum = getIdentityMat(n_const);
     // main loop:
-    for(; i < MAX_ROTATIONS && !rotations_converged; i++){
-        A_prime = doJacobiIteration(A);
+    for(i = 0; i < MAX_ROTATIONS && !rotations_converged; i++){
+        doJacobiIteration(A_prime, cumPum);
         rotations_converged = isConvergedJacobi(A, A_prime);
         A = A_prime;
     }
-
-
-
+    res.eigenVals = getMainDiagonal(cumPum);
+    res.eigenVecs = A_prime;
+    return res;
 }
 
-void executeSpk(Matrix vectors);
-
-
+void executeSpk(Matrix vectors){
+    return;
+}
 
