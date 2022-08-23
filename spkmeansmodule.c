@@ -202,6 +202,15 @@ Vector getInverseMainDiagonal(Matrix ddg){
     return res;
 }
 
+Vector getMainDiagonal(Matrix mat){
+    int i = 0;
+    Vector res = allocateVector(n_const);
+    for(i = 0; i < n_const; i++){
+        res[i] = mat[i][i];
+    }
+    return res;
+}
+
 
 void print_error(){
     printf("An Error Has Occurred\n");
