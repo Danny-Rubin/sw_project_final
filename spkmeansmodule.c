@@ -22,6 +22,14 @@ typedef double** Matrix;
 typedef double* Vector;
 typedef struct JacobiRes {Vector eigenVals; Matrix eigenVecs;} JacobiRes;
 
+/* linked list for memory management */
+struct node {
+    void * memory;
+    int key;
+    struct node *next;
+};
+
+struct node *memoryListHead = NULL;
 
 
 /*
@@ -40,6 +48,11 @@ typedef struct JacobiRes {Vector eigenVals; Matrix eigenVecs;} JacobiRes;
  * what it does: reads input file and calls appropriate execution function and then print to screen result
  */
 
+
+
+
+void freeAllMemory();
+void registerPtr(int key, void * memory);
 
 
 int readData(char *in_file_path, Matrix *vectors);
@@ -70,8 +83,11 @@ Matrix copyOf(Matrix mat, int dim);
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
     Matrix* matrixPtr = (Matrix *) calloc(sizeof (Matrix), 1); // @TODO: check if fails!!!
+    registerPtr(0, matrixPtr);
     JacobiRes jacobiRes;
     Matrix res = NULL;
+    atexit(freeAllMemory);
+
     if (!validateGoal(goal)){
         return 1;
     }
@@ -159,17 +175,19 @@ Vector allocateVector(int n){
         print_error();
         return NULL;
     }
+    registerPtr(0, res);
     return res;
 }
 
 
 Matrix allocateMatrix(int rows, int cols){
+    int i = 0;
     Matrix res = (Matrix) calloc(rows, sizeof (Vector));
     if (!res){
         print_error();
         return NULL;
     }
-    int i = 0;
+    registerPtr(0, res);
 
     for(i = 0; i < rows; i++){
         res[i] = allocateVector(cols);
@@ -754,3 +772,34 @@ void executeSpk(Matrix vectors){
     return;
 }
 
+
+
+
+
+
+
+
+/* Memory management: */
+
+
+/* add memory ptr at first position at list */
+void registerPtr(int key, void * memory) {
+    struct node *link = (struct node*) malloc(sizeof(struct node));
+    if(!link) {freeAllMemory(memoryListHead);}
+    link->key = key;
+    link->memory = memory;
+    link->next = memoryListHead;
+    memoryListHead = link;
+}
+
+
+void freeAllMemory() {
+    struct node* tmp;
+
+    while (memoryListHead != NULL) {
+        tmp = memoryListHead;
+        memoryListHead = memoryListHead->next;
+        free(tmp->memory); /* free memory */
+        free(tmp); /* free list link  */
+    }
+}
