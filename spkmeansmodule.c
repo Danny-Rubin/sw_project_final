@@ -58,8 +58,8 @@ int isConvergedJacobi(Matrix mat, Matrix matPrime);
 Matrix getIdentityMat(int dim);
 // return rotated mat and mutate cumpum to new cumpum
 Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
-int * getIandJ(Matrix mat, int dim);
-double * getCandS(Matrix mat, int dim);
+Vector getIandJ(Matrix mat, int dim);
+Vector getCandS(Matrix mat, int dim, int i, int j);
 Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 
@@ -603,9 +603,42 @@ Matrix getIdentityMat(int dim);
 // return rotated mat and mutate cumpum to new cumpum
 Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
 
-int * getIandJ(Matrix mat, int dim);
+/*
+ * This function calculates the row and column (i and j) of the off-diagonal element
+ * with the largest absolute value, and returns them in a double pointer
+ */
+Vector getIandJ(Matrix mat, int dim){
+    int a = 0, b = 0;
+    double largestAbsValue = 0;
+    Vector res = allocateVector(2); /* the vector that holds the indices i and j */
+    for (a = 0; a < dim; a++){
+        for (b = 0; b < dim; b++){
+            if (a != b && fabs(mat[a][b]) > largestAbsValue){
+                largestAbsValue = fabs(mat[a][b]);
+                /* assign the indices to i and j respectively: */
+                res[0] = a;
+                res[1] = b;
+            }
+        }
+    }
+    return res;
+}
 
-double * getCandS(Matrix mat, int dim);
+/*
+ * this function calculates the values of c and s parameters of the rotation matrix
+ * based on the known formulas, and returns them in a double pointer
+ */
+Vector getCandS(Matrix mat, int dim, int i, int j){
+    Vector res = allocateVector(2);
+    double theta = (mat[j][j]- mat[i][i])/(2 * mat[i][j]);
+    int signTheta = theta < 0 ? -1 : 1;
+    double t =  signTheta / (fabs(theta) + sqrt(pow(theta,2) + 1));
+    double c = 1 / sqrt(pow(t,2) + 1);
+    double s = t * c;
+    res[0] = c;
+    res[1] = s;
+    return res;
+}
 
 Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 
