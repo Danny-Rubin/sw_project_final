@@ -525,8 +525,22 @@ void printDoubleMatrix(Matrix mat, int rows, int cols){
     PrintData(matstr,rows, cols);
 }
 
+double offSquared(Matrix mat, int n){
+    int i = 0, j = 0;
+    double res = 0;
+
+    for (i=0 ; i < n; i++){
+        for (j=0;j < n; j++){
+            if (i != j)
+                res += pow(mat[i][j],2);
+        }
+    }
+    return res;
+}
+
 int isConvergedJacobi(Matrix mat, Matrix matPrime){
-    return 0;
+    // @todo: check if n_const is the correct value to pass
+    return (offSquared(mat, n_const) - offSquared(matPrime, n_const) <= EPSILON);
 }
 
 /* execution functions: */
