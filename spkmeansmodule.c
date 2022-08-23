@@ -60,7 +60,7 @@ Matrix getIdentityMat(int dim);
 Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
 Vector getIandJ(Matrix mat, int dim);
 Vector getCandS(Matrix mat, int dim, int i, int j);
-Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
+void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 
 
@@ -552,6 +552,16 @@ int isConvergedJacobi(Matrix mat, Matrix matPrime){
     return (offSquared(mat, n_const) - offSquared(matPrime, n_const) <= EPSILON);
 }
 
+Matrix getIdentityMat(int dim){
+    int i = 0;
+    Matrix res = allocateMatrix(dim, dim);
+    for(i = 0; i < dim; i++){
+        res[i][i] = 1;
+    }
+    return res;
+}
+
+
 /* execution functions: */
 
 Matrix executeWam(Matrix vectors){
@@ -640,11 +650,33 @@ Vector getCandS(Matrix mat, int dim, int i, int j){
     return res;
 }
 
-Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 
 Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 
+Matrix doJacobiIteration(Matrix mat, Matrix cumPum){
+    int i, j;
+    double c, s;
+    Vector iAndJ = getIandJ(mat, n_const);
+    i = (int) iAndJ[0];
+    j = (int) iAndJ[1];
+    int * cAndS = getCandS(mat, n_const);
+    c = cAndS[0];
+    s = cAndS[1];
+    updateCumpum(cumPum, n_const, i, j, c, s);
+    return rotateMat(mat, n_const, i, j, c, s);
+}
 
+void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s){
+    int count = 0;
+    Matrix res = cumPum;
+    for(count = 0; count < dim; count++){
+        res[count][i] = (c * res[count][i]) - (s * res[count][j]);
+    }
+    for(count = 0; count < dim; count++){
+        res[count][j] = (s * res[count][i]) - (s * res[count][j]);
+    }
+
+}
 
 
 JacobiRes executeJacobi(Matrix vectors){
