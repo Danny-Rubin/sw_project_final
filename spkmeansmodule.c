@@ -55,6 +55,15 @@ int validateMatrixSymmetric(Matrix matrix, int rows, int cols);
 int isConvergedJacobi(Matrix mat, Matrix matPrime);
 
 
+Matrix getIdentityMat(int dim);
+// return rotated mat and mutate cumpum to new cumpum
+Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
+int * getIandJ(Matrix mat, int dim);
+double * getCandS(Matrix mat, int dim);
+Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
+Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
+
+
 
 
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
@@ -539,7 +548,7 @@ double offSquared(Matrix mat, int n){
 }
 
 int isConvergedJacobi(Matrix mat, Matrix matPrime){
-    // @todo: check if n_const is the correct value to pass
+    // @todo: pud the pudder
     return (offSquared(mat, n_const) - offSquared(matPrime, n_const) <= EPSILON);
 }
 
@@ -588,13 +597,30 @@ Matrix executeLnorm(Matrix vectors){
     return res;
 }
 
+
+Matrix getIdentityMat(int dim);
+
+// return rotated mat and mutate cumpum to new cumpum
+Matrix doJacobiIteration(Matrix mat, Matrix cumPum);
+
+int * getIandJ(Matrix mat, int dim);
+
+double * getCandS(Matrix mat, int dim);
+
+Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
+
+Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
+
+
+
+
 JacobiRes executeJacobi(Matrix vectors){
     int i = 0, rotations_converged = 0;
     Matrix A = vectors;
     Matrix A_prime = NULL;
     // main loop:
     for(; i < MAX_ROTATIONS && !rotations_converged; i++){
-        A_prime = rotateMat(A);
+        A_prime = doJacobiIteration(A);
         rotations_converged = isConvergedJacobi(A, A_prime);
         A = A_prime;
     }
