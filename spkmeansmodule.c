@@ -62,6 +62,7 @@ Vector getIandJ(Matrix mat, int dim);
 Vector getCandS(Matrix mat, int dim, int i, int j);
 Matrix updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 Matrix rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
+Matrix copyOf(Matrix mat, int dim);
 
 
 
@@ -637,6 +638,17 @@ Vector getCandS(Matrix mat, int dim, int i, int j){
     double s = t * c;
     res[0] = c;
     res[1] = s;
+    return res;
+}
+/* creates a copy of a symmetric matrix */
+Matrix copyOf(Matrix mat, int dim){
+    int i = 0, j = 0;
+    Matrix res = allocateMatrix(dim, dim);
+    for (i = 0; i < dim; i++){
+        for (j = 0; j < dim; j++){
+            res[i][j] = mat[i][j];
+        }
+    }
     return res;
 }
 
