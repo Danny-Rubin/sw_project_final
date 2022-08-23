@@ -7,6 +7,7 @@
 
 #define DEBUG 1
 #define DEFAULT_MAX_ITER 300
+#define MAX_ROTATIONS 100
 #define EPSILON 0.00001
 #define True 1
 #define False 0
@@ -19,6 +20,7 @@ int d_const = 0;
 
 typedef double** Matrix;
 typedef double* Vector;
+typedef struct JacobiRes {Vector eigenVals; Matrix eigenVecs;} JacobiRes;
 
 
 
@@ -44,11 +46,13 @@ int readData(char *in_file_path, Matrix *vectors);
 Matrix executeWam(Matrix vectors);
 Matrix executeDdg(Matrix vectors, Matrix wam);
 Matrix executeLnorm(Matrix vectors);
-Matrix executeJacobi(Matrix vectors);
+JacobiRes executeJacobi(Matrix vectors);
 void executeSpk(Matrix vectors);
 void printDoubleMatrix(Matrix mat, int rows, int cols);
 int PrintData(char ***vec_strs, int rows, int cols);
 int validateGoal(char *goal);
+int validateMatrixSymmetric(Matrix matrix, int rows, int cols);
+int isConvergedJacobi(Matrix mat, Matrix matPrime);
 
 
 
@@ -56,6 +60,7 @@ int validateGoal(char *goal);
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
     Matrix* matrixPtr = (Matrix *) calloc(sizeof (Matrix), 1); // @TODO: check if fails!!!
+    JacobiRes jacobiRes;
     Matrix res = NULL;
     if (!validateGoal(goal)){
         return 1;
@@ -77,7 +82,11 @@ int cEntryPoint(int k, char* goal, char * fileName){
             printDoubleMatrix(res, n_const, n_const);
             break;
         case 'j':
-            res = executeJacobi(*matrixPtr);
+            if(!validateMatrixSymmetric(* matrixPtr, n_const, d_const)){ /* input matrix not symmetric*/
+                print_invalid_input();
+                return 1;
+            }
+            jacobiRes = executeJacobi(*matrixPtr);
             // @todo: implement and print
             break;
         case 's':
@@ -125,16 +134,27 @@ int validateMatrixSymmetric(Matrix matrix, int rows, int cols){
 
 Vector allocateVector(int n){
     Vector res = (Vector) calloc(n, sizeof (double));
+    if (!res){
+        print_error();
+        return NULL;
+    }
     return res;
 }
 
 
 Matrix allocateMatrix(int rows, int cols){
     Matrix res = (Matrix) calloc(rows, sizeof (Vector));
+    if (!res){
+        print_error();
+        return NULL;
+    }
     int i = 0;
 
     for(i = 0; i < rows; i++){
         res[i] = allocateVector(cols);
+        if (!res[i]){
+            return NULL;
+        }
     }
     return res;
 }
@@ -505,6 +525,10 @@ void printDoubleMatrix(Matrix mat, int rows, int cols){
     PrintData(matstr,rows, cols);
 }
 
+int isConvergedJacobi(Matrix mat, Matrix matPrime){
+    return 0;
+}
+
 /* execution functions: */
 
 Matrix executeWam(Matrix vectors){
@@ -550,7 +574,20 @@ Matrix executeLnorm(Matrix vectors){
     return res;
 }
 
-Matrix executeJacobi(Matrix vectors);
+JacobiRes executeJacobi(Matrix vectors){
+    int i = 0, rotations_converged = 0;
+    Matrix A = vectors;
+    Matrix A_prime = NULL;
+    // main loop:
+    for(; i < MAX_ROTATIONS && !rotations_converged; i++){
+        A_prime = rotateMat(A);
+        rotations_converged = isConvergedJacobi(A, A_prime);
+        A = A_prime;
+    }
+
+
+
+}
 
 void executeSpk(Matrix vectors);
 
