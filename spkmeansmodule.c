@@ -211,6 +211,14 @@ Vector getMainDiagonal(Matrix mat){
     return res;
 }
 
+void free_memory_arr(double** arr, int n){
+    int i = 0;
+    for(i = 0; i < n; i++){
+        free(arr[i]);
+    }
+    free(arr);
+}
+
 
 void print_error(){
     printf("An Error Has Occurred\n");
