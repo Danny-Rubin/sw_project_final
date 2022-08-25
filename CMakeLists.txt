@@ -3,4 +3,4 @@ project(sw_project_final C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(sw_project_final spkmeansmodule.c GarbageCollector.c)
+add_executable(sw_project_final spkmeansmodule.c)
