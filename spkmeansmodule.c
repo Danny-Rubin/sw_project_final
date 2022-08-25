@@ -84,7 +84,6 @@ Matrix copyOf(Matrix mat, int dim);
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
     Matrix* matrixPtr = allocateVector(1, sizeof(Matrix), True);
-    registerPtr(0, matrixPtr);
     JacobiRes jacobiRes;
     Matrix res = NULL;
     atexit(freeAllMemory);
