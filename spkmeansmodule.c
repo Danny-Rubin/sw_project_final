@@ -168,8 +168,13 @@ int validateMatrixSymmetric(Matrix matrix, int rows, int cols){
     return True;
 }
 
-
-Vector allocateVector(int n){
+/*
+ * This function allocates a vector in memory
+ * Params:
+ * n- vector dimension,
+ * shouldRegister (boolean)- determines if the vector will be saved in the general memory linked list
+ */
+Vector allocateVector(int n, int shouldRegister) {
     Vector res = (Vector) calloc(n, sizeof (double));
     if (!res){
         print_error();
@@ -179,8 +184,13 @@ Vector allocateVector(int n){
     return res;
 }
 
-
-Matrix allocateMatrix(int rows, int cols){
+/*
+ * This function allocates a matrix in memory
+ * Params:
+ * rows and cols - desired mat dimensions,
+ * shouldRegister (boolean)- determines if the matrix will be saved in the general memory linked list
+ */
+Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
     int i = 0;
     Matrix res = (Matrix) calloc(rows, sizeof (Vector));
     if (!res){
@@ -190,7 +200,7 @@ Matrix allocateMatrix(int rows, int cols){
     registerPtr(0, res);
 
     for(i = 0; i < rows; i++){
-        res[i] = allocateVector(cols);
+        res[i] = allocateVector(cols, True);
         if (!res[i]){
             return NULL;
         }
@@ -225,7 +235,7 @@ double distance(Vector vector1, Vector vector2){
 
 Vector getInverseMainDiagonal(Matrix ddg){
     int i = 0;
-    Vector res = allocateVector(n_const);
+    Vector res = allocateVector(n_const, True);
 
     for(i = 0; i < n_const; i++){
         res[i] = 1 / sqrt(ddg[i][i]);
@@ -235,7 +245,7 @@ Vector getInverseMainDiagonal(Matrix ddg){
 
 Vector getMainDiagonal(Matrix mat){
     int i = 0;
-    Vector res = allocateVector(n_const);
+    Vector res = allocateVector(n_const, True);
     for(i = 0; i < n_const; i++){
         res[i] = mat[i][i];
     }
@@ -603,7 +613,7 @@ int isConvergedJacobi(Matrix mat, Matrix matPrime){
 
 Matrix getIdentityMat(int dim){
     int i = 0;
-    Matrix res = allocateMatrix(dim, dim);
+    Matrix res = allocateMatrix(dim, dim, True);
     for(i = 0; i < dim; i++){
         res[i][i] = 1;
     }
@@ -614,7 +624,7 @@ Matrix getIdentityMat(int dim){
 /* execution functions: */
 
 Matrix executeWam(Matrix vectors){
-    Matrix res = allocateMatrix(n_const, n_const);
+    Matrix res = allocateMatrix(n_const, n_const, True);
     int i = 0, j =0;
     for(i = 0; i < n_const; i++){
         for(j = 0; j < n_const; j++){
@@ -627,7 +637,7 @@ Matrix executeWam(Matrix vectors){
 
 Matrix executeDdg(Matrix vectors, Matrix wam){
     int i = 0;
-    Matrix res = allocateMatrix(n_const, n_const);
+    Matrix res = allocateMatrix(n_const, n_const, True);
     if(!wam){
         wam = executeWam(vectors);
     }
@@ -644,7 +654,7 @@ Matrix executeLnorm(Matrix vectors){
     Matrix ddg = executeDdg(vectors, wam);
     Vector inverseMainDiagonal = getInverseMainDiagonal(ddg);
 
-    Matrix res = allocateMatrix(n_const, n_const);
+    Matrix res = allocateMatrix(n_const, n_const, True);
 
 
     int i = 0, j =0;
@@ -668,7 +678,7 @@ void doJacobiIteration(Matrix mat, Matrix cumPum);
 Vector getIandJ(Matrix mat, int dim){
     int a = 0, b = 0;
     double largestAbsValue = 0;
-    Vector res = allocateVector(2); /* the vector that holds the indices i and j */
+    Vector res = allocateVector(2, True); /* the vector that holds the indices i and j */
     for (a = 0; a < dim; a++){
         for (b = 0; b < dim; b++){
             if (a != b && fabs(mat[a][b]) > largestAbsValue){
@@ -687,7 +697,7 @@ Vector getIandJ(Matrix mat, int dim){
  * based on the known formulas, and returns them in a double pointer
  */
 Vector getCandS(Matrix mat, int i, int j) {
-    Vector res = allocateVector(2);
+    Vector res = allocateVector(2, True);
     double theta = (mat[j][j]- mat[i][i])/(2 * mat[i][j]); // Todo: handle mat[i][j] = 0
     double signTheta = theta < 0 ? -1 : 1;
     double t =  signTheta / (fabs(theta) + sqrt(pow(theta,2) + 1));
@@ -700,7 +710,7 @@ Vector getCandS(Matrix mat, int i, int j) {
 /* creates a copy of a symmetric matrix */
 Matrix copyOf(Matrix mat, int dim){
     int i = 0, j = 0;
-    Matrix res = allocateMatrix(dim, dim);
+    Matrix res = allocateMatrix(dim, dim, False);
     for (i = 0; i < dim; i++){
         for (j = 0; j < dim; j++){
             res[i][j] = mat[i][j];
