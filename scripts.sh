@@ -40,6 +40,6 @@ function tsiben() {
       # cat outpudpudpud.txt
 }
 
-#run_all_memcheck
+run_all_memcheck
 tsiben
 #run_jacobi

@@ -12,7 +12,7 @@
 #define True 1
 #define False 0
 
-#define ASSERT_PRINT_ERROR(cond) if(!(cond)){print_error(); exit(1); }
+
 
 /* global variables of the program: number of vectors, number of clusters and input vectors dimension */
 
@@ -693,8 +693,8 @@ Vector getIandJ(Matrix mat, int dim) {
  */
 Vector getCandS(Matrix mat, int i, int j) {
     Vector res = allocateVector(2, sizeof(double), True);
-    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]);
-    ASSERT_PRINT_ERROR(mat[j][j] != 0)
+
+    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]); // Todo: handle mat[i][j] = 0
     double signTheta = theta < 0 ? -1 : 1;
     double t = signTheta / (fabs(theta) + sqrt(pow(theta, 2) + 1));
     double c = 1.0 / sqrt(pow(t, 2) + 1);
