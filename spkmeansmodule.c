@@ -54,7 +54,8 @@ struct node *memoryListHead = NULL;
 void freeAllMemory();
 void registerPtr(int key, void * memory);
 
-
+void *allocateVector(int n, size_t elementSize, int shouldRegister);
+Matrix allocateMatrix(int rows, int cols, int shouldRegister);
 int readData(char *in_file_path, Matrix *vectors);
 Matrix executeWam(Matrix vectors);
 Matrix executeDdg(Matrix vectors, Matrix wam);
@@ -82,7 +83,7 @@ Matrix copyOf(Matrix mat, int dim);
 
 // "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
 int cEntryPoint(int k, char* goal, char * fileName){
-    Matrix* matrixPtr = (Matrix *) calloc(sizeof (Matrix), 1); // @TODO: check if fails!!!
+    Matrix* matrixPtr = allocateVector(1, sizeof(Matrix), True);
     registerPtr(0, matrixPtr);
     JacobiRes jacobiRes;
     Matrix res = NULL;
@@ -113,13 +114,6 @@ int cEntryPoint(int k, char* goal, char * fileName){
                 return 1;
             }
             jacobiRes = executeJacobi(*matrixPtr);
-
-            //             Matrix eigenValsMat = calloc(1, sizeof(Vector));
-            //             if(!eigenValsMat){
-            //                 print_error();
-            //                 return 1;
-            //                 }
-            //             eigenValsMat[0] = jacobiRes.eigenVals;
             printDoubleMatrix(&jacobiRes.eigenVals, 1, n_const); // Todo check that print format is good, e.g spaces
             printDoubleMatrix(jacobiRes.eigenVecs, n_const, n_const);
             // @todo: implement and print
@@ -172,15 +166,18 @@ int validateMatrixSymmetric(Matrix matrix, int rows, int cols){
  * This function allocates a vector in memory
  * Params:
  * n- vector dimension,
+ * elementSize- size of each element in the vector
  * shouldRegister (boolean)- determines if the vector will be saved in the general memory linked list
  */
-Vector allocateVector(int n, int shouldRegister) {
-    Vector res = (Vector) calloc(n, sizeof (double));
+void *allocateVector(int n, size_t elementSize, int shouldRegister) {
+    Vector res = (Vector) calloc(n, elementSize);
     if (!res){
         print_error();
         return NULL;
     }
-    registerPtr(0, res);
+    if (shouldRegister){
+        registerPtr(0, res);
+    }
     return res;
 }
 
@@ -197,10 +194,11 @@ Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
         print_error();
         return NULL;
     }
-    registerPtr(0, res);
-
+    if (shouldRegister){
+        registerPtr(0, res);
+    }
     for(i = 0; i < rows; i++){
-        res[i] = allocateVector(cols, True);
+        res[i] = allocateVector(cols, sizeof(double), True);
         if (!res[i]){
             return NULL;
         }
@@ -235,7 +233,7 @@ double distance(Vector vector1, Vector vector2){
 
 Vector getInverseMainDiagonal(Matrix ddg){
     int i = 0;
-    Vector res = allocateVector(n_const, True);
+    Vector res = allocateVector(n_const, sizeof(double), True);
 
     for(i = 0; i < n_const; i++){
         res[i] = 1 / sqrt(ddg[i][i]);
@@ -245,7 +243,7 @@ Vector getInverseMainDiagonal(Matrix ddg){
 
 Vector getMainDiagonal(Matrix mat){
     int i = 0;
-    Vector res = allocateVector(n_const, True);
+    Vector res = allocateVector(n_const, sizeof(double), True);
     for(i = 0; i < n_const; i++){
         res[i] = mat[i][i];
     }
@@ -334,6 +332,7 @@ int get_dimension(char *in_file_path, int line_size){
         print_error();
         return False;
     }
+    // line = allocateVector(line_size, True, sizeof (char));
     line = (char  *) calloc(line_size, sizeof (char));
     if (line == NULL){
         if (DEBUG){
@@ -678,7 +677,7 @@ void doJacobiIteration(Matrix mat, Matrix cumPum);
 Vector getIandJ(Matrix mat, int dim){
     int a = 0, b = 0;
     double largestAbsValue = 0;
-    Vector res = allocateVector(2, True); /* the vector that holds the indices i and j */
+    Vector res = allocateVector(2, sizeof(double), True); /* the vector that holds the indices i and j */
     for (a = 0; a < dim; a++){
         for (b = 0; b < dim; b++){
             if (a != b && fabs(mat[a][b]) > largestAbsValue){
@@ -697,7 +696,7 @@ Vector getIandJ(Matrix mat, int dim){
  * based on the known formulas, and returns them in a double pointer
  */
 Vector getCandS(Matrix mat, int i, int j) {
-    Vector res = allocateVector(2, True);
+    Vector res = allocateVector(2, sizeof(double), True);
     double theta = (mat[j][j]- mat[i][i])/(2 * mat[i][j]); // Todo: handle mat[i][j] = 0
     double signTheta = theta < 0 ? -1 : 1;
     double t =  signTheta / (fabs(theta) + sqrt(pow(theta,2) + 1));
