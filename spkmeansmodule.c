@@ -89,6 +89,7 @@ int cEntryPoint(int k, char* goal, char * fileName){
     atexit(freeAllMemory);
 
     if (!validateGoal(goal)){
+        print_invalid_input();
         return 1;
     }
     if(!readData(fileName, matrixPtr)){
@@ -138,10 +139,17 @@ int cEntryPoint(int k, char* goal, char * fileName){
  * @TODO: add allocation validation
  */
 
-// @TODO: implement
 /* this function validates that the goal input is legal*/
 int validateGoal(char *goal){
-    return 1;
+    if (
+            strcmp(goal, "ddg") == 0 ||
+            strcmp(goal, "lnorm") == 0 ||
+            strcmp(goal, "jacobi") == 0 ||
+            strcmp(goal, "wam") == 0
+    ){
+        return True;
+    }
+    return False;
 }
 
 /* this function takes a matrix and checks if it's symmetric */
@@ -803,7 +811,7 @@ void registerPtr(int key, void * memory) {
 
 
 void freeAllMemory() {
-    printf("called free mem (:");
+    printf("called free mem (:\n");
     struct node* tmp;
 
     while (memoryListHead != NULL) {
