@@ -693,7 +693,7 @@ Vector getIandJ(Matrix mat, int dim) {
  */
 Vector getCandS(Matrix mat, int i, int j) {
     Vector res = allocateVector(2, sizeof(double), True);
-    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]); 
+    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]);
     ASSERT_PRINT_ERROR(mat[j][j] != 0)
     double signTheta = theta < 0 ? -1 : 1;
     double t = signTheta / (fabs(theta) + sqrt(pow(theta, 2) + 1));
