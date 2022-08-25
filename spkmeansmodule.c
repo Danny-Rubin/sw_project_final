@@ -180,7 +180,7 @@ void *allocateVector(int n, size_t elementSize, int shouldRegister) {
     Vector res = (Vector) calloc(n, elementSize);
     if (!res){
         print_error();
-        return NULL;
+        exit(1);
     }
     if (shouldRegister){
         registerPtr(0, res);
@@ -199,7 +199,7 @@ Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
     Matrix res = (Matrix) calloc(rows, sizeof (Vector));
     if (!res){
         print_error();
-        return NULL;
+        exit(1);
     }
     if (shouldRegister){
         registerPtr(0, res);
@@ -339,7 +339,6 @@ int get_dimension(char *in_file_path, int line_size){
         print_error();
         return False;
     }
-    // line = allocateVector(line_size, True, sizeof (char));
     line = (char  *) calloc(line_size, sizeof (char));
     if (line == NULL){
         if (DEBUG){
@@ -418,19 +417,12 @@ Vector str_to_vec(char *line,int line_len, int d){
     char *token = NULL;
     int i = 0;
 
-
-    res = (Vector) calloc(d, sizeof(double));
+    res = allocateVector(d, sizeof (double), True);
     line_copy = (char *) calloc(line_len+1, sizeof(char ));
-    strcpy(line_copy, line);
-    if(res == NULL){
-        if (DEBUG == 1){
-            printf("in 'str_to_vec', res is null\n");
-        }
-        print_error();
-        return NULL;
+    if (!line_copy){
+        exit(1);
     }
-
-
+    strcpy(line_copy, line);
     token = strtok(line_copy, s);
     while( token != NULL ) {
         res[i] = atof(token);
@@ -507,17 +499,6 @@ int readData(char *in_file_path, Matrix *vectors){
             line =   (char *) calloc(lines_length[i+1] + 1, sizeof(char));
 
         }
-
-        if(vec == NULL){
-            if (DEBUG == 1){
-                printf("in 'readData', vec==NULL");
-            }
-            print_error();
-            fclose(fp);
-            free(lines_length);
-            free(line);
-            return False;
-        }
         (*vectors)[i] = vec;
     }
     fclose(fp);
@@ -528,12 +509,7 @@ int readData(char *in_file_path, Matrix *vectors){
 
 
 char *doubleToRoundStr(double num){
-    char *res = NULL;
-
-    res = (char *) calloc(400, sizeof (char));
-    if(res == NULL){
-        return NULL;
-    }
+    char *res = allocateVector(400, sizeof (char), True);
     sprintf(res, "%.4f", num);
     return res;
 }
@@ -570,10 +546,6 @@ char ***doubleVecsToStr(Matrix vectors, int rows, int cols){
     for(i=0; i < rows; i++){
         for(j=0; j < cols; j++) {
             char *val= doubleToRoundStr(vectors[i][j]);
-            if(val == NULL){
-                print_error();
-                return NULL;
-            }
             res[i][j] = val;
         }
     }
