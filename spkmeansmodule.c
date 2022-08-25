@@ -720,7 +720,7 @@ void rotateMat(Matrix mat, int dim, int i, int j, double c, double s){
     mat[i][i] = pow(c, 2) * copy[i][i] + pow(s, 2) * copy[j][j] - 2 * s * c * copy[i][j];
     mat[j][j] = pow(s, 2) * copy[i][i] + pow(c, 2) * copy[j][j] + 2 * s * c * copy[i][j];
     mat[i][j] = mat[j][i] = 0;
-    freeMatrix(copy, dim);
+    // freeMatrix(copy, dim);
 }
 
 void doJacobiIteration(Matrix mat, Matrix cumPum){
@@ -747,7 +747,7 @@ void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s){
     for(count = 0; count < dim; count++){
         cumPum[count][j] = (s * copy[count][i]) - (s * copy[count][j]);
     }
-    freeMatrix(copy, dim);
+    // freeMatrix(copy, dim); // ###
 }
 
 
@@ -790,10 +790,12 @@ void registerPtr(int key, void * memory) {
     link->memory = memory;
     link->next = memoryListHead;
     memoryListHead = link;
+    memoryListHead = link;
 }
 
 
 void freeAllMemory() {
+    printf("called free mem (:");
     struct node* tmp;
 
     while (memoryListHead != NULL) {
