@@ -1,26 +1,26 @@
 function run_wam() {
-  echo "running: _wam\n"
+  echo "\nrunning: _wam\n"
   gcc spkmeans.c spkmeansmodule.c
   ./a.out wam /Users/drubinov/Downloads/sw_project_final/inputs_hw1/smol.txt #> sm.txt
   # cat outpudpudpud.txt
 }
 
 function run_ddg() {
-  echo "running: ddg\n"
+  echo "\nrunning: ddg\n"
   gcc spkmeans.c spkmeansmodule.c
   ./a.out ddg /Users/drubinov/Downloads/sw_project_final/inputs_hw1/smol.txt #> sm.txt
   # cat outpudpudpud.txt
 }
 
 function run_lnorm() {
-  echo "running: lnorm\n"
+  echo "\nrunning: lnorm\n"
   gcc spkmeans.c spkmeansmodule.c
-  ./a.out lnoorm /Users/drubinov/Downloads/sw_project_final/inputs_hw1/smol.txt #> sm.txt
+  ./a.out lnorm /Users/drubinov/Downloads/sw_project_final/inputs_hw1/smol.txt #> sm.txt
   # cat outpudpudpud.txt
 }
 
 function run_jacobi() {
-  echo "running: jacobi\n"
+  echo "\nrunning: jacobi\n"
   gcc spkmeans.c spkmeansmodule.c
   ./a.out jacobi /Users/drubinov/Downloads/sw_project_final/example_jacobi.txt #> sm.txt
   # cat outpudpudpud.txt

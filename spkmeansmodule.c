@@ -50,7 +50,7 @@ struct node *memoryListHead = NULL;
 
 
 
-
+/* function signatures: */
 void freeAllMemory();
 void registerPtr(int key, void * memory);
 
@@ -67,10 +67,7 @@ int PrintData(char ***vec_strs, int rows, int cols);
 int validateGoal(char *goal);
 int validateMatrixSymmetric(Matrix matrix, int rows, int cols);
 int isConvergedJacobi(Matrix mat, Matrix matPrime);
-
-
 Matrix getIdentityMat(int dim);
-// return rotated mat and mutate cumpum to new cumpum
 void doJacobiIteration(Matrix mat, Matrix cumPum);
 Vector getIandJ(Matrix mat, int dim);
 Vector getCandS(Matrix mat, int i, int j);
@@ -80,8 +77,7 @@ Matrix copyOf(Matrix mat, int dim);
 
 
 
-
-// "/Users/drubinov/Downloads/sw_project_final/inputs_hw1/input_1.txt"
+/* main entry point for c interface */
 int cEntryPoint(int k, char* goal, char * fileName){
     Matrix* matrixPtr = allocateVector(1, sizeof(Matrix), True);
     JacobiRes jacobiRes;
@@ -205,7 +201,7 @@ Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
         registerPtr(0, res);
     }
     for(i = 0; i < rows; i++){
-        res[i] = allocateVector(cols, sizeof(double), True);
+        res[i] = allocateVector(cols, sizeof(double), shouldRegister);
         if (!res[i]){
             return NULL;
         }
@@ -393,6 +389,7 @@ int *getLinesLengths(int num_lines, char *filename){
         print_error();
         return NULL;
     }
+    registerPtr(0, linesLengths);
     for(i = 0; i < num_lines; i++){
         c = 0;
         line_len = 1;
@@ -460,6 +457,7 @@ int readData(char *in_file_path, Matrix *vectors){
         return False;
     }
     *vectors = (double **)calloc(n_const, sizeof(double  *));
+    registerPtr(0, *vectors);
     if (*vectors == NULL){
         if (DEBUG == 1){
             printf("in 'readData', *vectors == NULL");
@@ -502,7 +500,6 @@ int readData(char *in_file_path, Matrix *vectors){
         (*vectors)[i] = vec;
     }
     fclose(fp);
-    free(lines_length);
     return True;
 }
 
@@ -708,7 +705,7 @@ void rotateMat(Matrix mat, int dim, int i, int j, double c, double s){
     mat[i][i] = pow(c, 2) * copy[i][i] + pow(s, 2) * copy[j][j] - 2 * s * c * copy[i][j];
     mat[j][j] = pow(s, 2) * copy[i][i] + pow(c, 2) * copy[j][j] + 2 * s * c * copy[i][j];
     mat[i][j] = mat[j][i] = 0;
-    // freeMatrix(copy, dim);
+    freeMatrix(copy, dim);
 }
 
 void doJacobiIteration(Matrix mat, Matrix cumPum){
@@ -735,7 +732,7 @@ void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s){
     for(count = 0; count < dim; count++){
         cumPum[count][j] = (s * copy[count][i]) - (s * copy[count][j]);
     }
-    // freeMatrix(copy, dim); // ###
+    freeMatrix(copy, dim); // ###
 }
 
 
