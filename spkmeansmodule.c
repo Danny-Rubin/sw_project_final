@@ -1,3 +1,5 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,23 +39,6 @@ struct node {
 struct node *memoryListHead = NULL;
 
 
-/*
- * python entry point function:
- * only function integrated with python interface
- * params: filename, k, goal
- * what it does: call general entry point after converting python args
- */
-
-
-
-
-/*
- * c entry point function:
- * params: filename, k, goal
- * what it does: reads input file and calls appropriate execution function and then print to screen result
- */
-
-
 
 /* function signatures: */
 void freeAllMemory();
@@ -66,6 +51,8 @@ Matrix allocateMatrix(int rows, int cols, int shouldRegister);
 
 int readData(char *in_file_path, Matrix *vectors);
 
+int writeData(char *out_file, char ***vecStrs, int d, int k);
+
 Matrix executeWam(Matrix vectors);
 
 Matrix executeDdg(Matrix vectors, Matrix wam);
@@ -75,6 +62,8 @@ Matrix executeLnorm(Matrix vectors);
 JacobiRes executeJacobi(Matrix vectors);
 
 void executeSpk(Matrix vectors);
+
+void executeKmeans(Matrix vectors);
 
 void printDoubleMatrix(Matrix mat, int rows, int cols);
 
@@ -101,7 +90,29 @@ void rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 Matrix copyOf(Matrix mat, int dim);
 
 
-/* main entry point for c interface */
+/*
+ * python entry point function:
+ * only function integrated with python interface
+ * params: filename, k, goal
+ * what it does: call general entry point after converting python args
+ */
+static PyObject* fit(PyObject *self, PyObject *args){
+    int k = 0, res = 0;
+    char *goal;
+    char* fileName;
+
+    if(!PyArg_ParseTuple(args, "iss", &k, &goal, &fileName)){
+        return  NULL;
+    }
+    return cEntryPoint(k, goal, fileName);
+}
+
+
+
+/* main entry point for c interface
+ * params: filename, k, goal
+ * what it does: reads input file and calls appropriate execution function and then print to screen result
+ */
 int cEntryPoint(int k, char *goal, char *fileName) {
     Matrix *matrixPtr = allocateVector(1, sizeof(Matrix), True);
     JacobiRes jacobiRes;
@@ -139,8 +150,13 @@ int cEntryPoint(int k, char *goal, char *fileName) {
             // @todo: implement and print
             break;
         case 's':
-            executeSpk(*matrixPtr);
+            // calculates the vectors that will be the input for kmeans++ algorithm:
+            executeSpk(*matrixPtr); // @todo- implement function
             // @todo: write to file
+            break;
+        case 'k':
+            executeKmeans(*matrixPtr); // @todo- implement function
+            // @todo- write to file
             break;
         default:
             print_error();
@@ -524,6 +540,27 @@ int readData(char *in_file_path, Matrix *vectors) {
 }
 
 
+int writeData(char *out_file, char ***vecStrs, int d, int k){
+    FILE *fp = NULL;
+    int i = 0; int j = 0;
+
+    fp = fopen(out_file, "w");
+    if (fp ==NULL){
+        if (DEBUG) {
+            printf("error in writeData: fp is null\n");}
+        print_error();
+        return False;
+    }
+    for(i=0; i < k; i++){
+        for(j=0; j <d -1; j++){
+            fprintf(fp, "%s,", vecStrs[i][j]);
+        }
+        fprintf(fp, "%s\n", vecStrs[i][d - 1]);
+    }
+    fclose(fp);
+    return True;
+}
+
 char *doubleToRoundStr(double num) {
     char *res = allocateVector(400, sizeof(char), True);
     sprintf(res, "%.4f", num);
@@ -803,7 +840,19 @@ void executeSpk(Matrix vectors) {
     return;
 }
 
+/*
+ * This function takes a matrix of N vectors and returns a
+ */
+void getVectorsForSPK(Matrix vectors){
 
+}
+/*
+ * This matrix takes a matrix of vectors and a matrix of centroids (initialized by the
+ */
+// @todo- complete function from previous project
+int kmeans(int k, Matrix vectors, Matrix centroids) {
+    return 0;
+}
 
 
 
