@@ -100,7 +100,7 @@ def main():
     [k, goal, file_name] = args
     if exists("c_output_file.txt"):
         remove("c_output_file.txt")
-    result = mykmeanssp.fit(str(k), goal, file_name)  # todo: check module name is valid
+    result = mykmeanssp.pythonEntryPoint(str(k), goal, file_name)  # todo: check module name is valid
     if (goal != "spk"):
         finish_run()
         return result
@@ -113,10 +113,11 @@ def main():
         return 1
     if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
         return 1
-    result = mykmeanssp.fit(str(k), "kmeans", "c_input_file.txt")
+    result = mykmeanssp.pythonEntryPoint(str(k), "kmeans", "c_input_file.txt")
     if result == 0:
         print_results(centroids_indices)
     finish_run()
+    return result
 
 
 def get_program_args():
