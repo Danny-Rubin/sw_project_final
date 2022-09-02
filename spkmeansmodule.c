@@ -96,7 +96,7 @@ Matrix copyOf(Matrix mat, int dim);
  * params: filename, k, goal
  * what it does: call general entry point after converting python args
  */
-static PyObject* fit(PyObject *self, PyObject *args){
+static PyObject* pythonEntryPoint(PyObject *self, PyObject *args){
     int k = 0, res = 0;
     char *goal;
     char* fileName;
@@ -855,10 +855,6 @@ int kmeans(int k, Matrix vectors, Matrix centroids) {
 }
 
 
-
-
-
-
 /* Memory management: */
 
 
@@ -884,4 +880,33 @@ void freeAllMemory() {
         free(tmp); /* free list link  */
     }
     // system("leaks executablename");
+}
+
+/* Python module functions */
+static PyMethodDef capi_methods[] = {
+        {"pythonEntryPoint",
+                (PyCFunction) pythonEntryPoint,
+                     METH_VARARGS,
+                PyDoc_STR("Python entry point function")
+        },
+        {NULL, NULL, 0, NULL}};
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "mykmeanssp",   /* name of module */
+        NULL, /* module documentation, may be NULL */
+        -1,       /* size of per-interpreter state of the module,
+         or -1 if the module keeps state in global variables. */
+        capi_methods
+};
+
+
+PyMODINIT_FUNC PyInit_mykmeanssp(void)
+{
+    PyObject *m;
+    m = PyModule_Create(&moduledef);
+    if (!m){
+        return NULL;
+    }
+    return m;
 }
