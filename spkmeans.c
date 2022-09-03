@@ -1,4 +1,4 @@
-// c interface file
+/* c interface file */
 
 #include <math.h>
 #include <stdlib.h>
@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "spkmeansmodule.h"
+#include "utils.h"
 
 #define DEBUG 1
 #define DEFAULT_MAX_ITER 300
@@ -19,16 +20,16 @@ int validateProgramArgs(int argc);
 
 
 int main(int argc, char* argv[]){
-    // read argv
-    // validate cmd args
-    // call c entry point with args
-    // capture return value
-    // return 0 on success and 1 on error
+    /*read argv
+     validate cmd args
+     call c entry point with args
+     capture return value
+     return 0 on success and 1 on error */
     if(!validateProgramArgs(argc)){
         return 1;
     }
 
-    return cEntryPoint(-1, argv[1], argv[2]);
+    return cEntryPoint(-1, argv[1], argv[2], 0);
 
 }
 

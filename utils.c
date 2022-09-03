@@ -30,7 +30,7 @@ void freeAllMemory() {
         free(tmp->memory); /* free memory */
         free(tmp); /* free list link  */
     }
-    // system("leaks executablename");
+
 }
 /*
  * This function allocates a vector in memory
@@ -162,12 +162,10 @@ char ***doubleVecsToStr(Matrix vectors, int rows, int cols) {
 
 void writeMatrixToFile(Matrix vectors, char *outFileName, int rows, int cols){
     char ***StrMat = doubleVecsToStr(vectors, rows, cols);
-//     printf("finished double vecs to str \n");
         if(!StrMat){
             exit(1);
         }
     writeData(outFileName, StrMat, cols, rows);
-    // printf("finished write data\n");
 }
 
 /* This function takes a matrix of numbers as formatted strings and prints
@@ -186,9 +184,7 @@ int PrintData(char ***vec_strs, int rows, int cols) {
 
 
 void printDoubleMatrix(Matrix mat, int rows, int cols) {
-    // printf("in printDOUBLE %f %f %f %f\n", mat[0][0],mat[0][1],mat[1][0],mat[1][1]);
     char ***matstr = doubleVecsToStr(mat, rows, cols);
-    // printf("in mATSTR %s %s %s %s\n", matstr[0][0],matstr[0][1],matstr[1][0],matstr[1][1]);
     PrintData(matstr, rows, cols);
 }
 

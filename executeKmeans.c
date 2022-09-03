@@ -98,7 +98,6 @@ int isStrNumeric(char *str){
 
 
 int kmeans(Matrix vectors, int k, int N, int d) {
-     //printf("in kmeans\n");
     int closest_clust_index = 0;
     int i = 0;
     int j = 0;
