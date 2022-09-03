@@ -9,6 +9,7 @@
 #define DEBUG 1
 #define True 1
 #define False 0
+#define MAX_ITER 300
 
 typedef double **Matrix;
 typedef double *Vector;
@@ -53,6 +54,10 @@ void writeMatrixToFile(Matrix vectors, char *outFileName, int rows, int cols);
 int PrintData(char ***vec_strs, int rows, int cols);
 
 void printDoubleMatrix(Matrix mat, int rows, int cols);
+
+void free_memory_arr(double** arr, int n);
+
+double norm(Vector vec, int n);
 
 
 

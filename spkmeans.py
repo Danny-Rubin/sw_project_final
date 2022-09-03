@@ -18,7 +18,10 @@ def print_invalid_input():
 # @todo- check that this version works correctly !
 def read_data(filename):
     try:
-        df = pd.read_csv(filename)
+        df = pd.read_csv(filename, header=None)
+        #print("shubidubi")
+        #print(df)
+        #print("shubidubi")
         return df.to_numpy()
     except:
         print_error()
@@ -29,7 +32,7 @@ def initialize_centroids(vectors: np.ndarray, k: int):
     try:
         N = vectors.shape[0]
         centroids_indices = np.zeros(k, dtype="int32")
-        centroids_indices[0] = np.random.randint(0, N)
+        centroids_indices[0] = np.random.choice([i for i in range(N)])
         dists = np.zeros(N)
         probs = np.zeros(N)
         for i in range(1, k):
@@ -38,6 +41,8 @@ def initialize_centroids(vectors: np.ndarray, k: int):
                 dists[l] = np.min(d)
             probs = dists / np.sum(dists)
             centroids_indices[i] = np.random.choice(N, p=probs)
+        #print("centroids_indices:")
+        #print(centroids_indices)
         return centroids_indices
     except:
         print_error()
@@ -53,15 +58,24 @@ def create_c_input(vectors: np.ndarray, centroids_indices: np.ndarray):
     """
     N = vectors.shape[0]
     try:
+        #print()
+        #print(vectors)
+        #print()
         sorted_vectors = [list(vectors[i]) for i in centroids_indices] + [list(vectors[i]) for i in range(N) if
                                                                           i not in centroids_indices]
         sorted_vectors = [[format(x, '.4f') for x in i] for i in sorted_vectors]
         if exists("c_input_file.txt"):
             remove("c_input_file.txt")
-
+        #print("file written after pp:")
         with open("c_input_file.txt", 'w+') as c_input:
             for vec in sorted_vectors:
                 c_input.write(",".join(vec) + "\n")
+                #print(vec)
+
+
+
+            #print("end file")
+
         return True
     except Exception as err:
         if DEBUG:
@@ -106,20 +120,27 @@ def main():
         return result
     # call the kmeans ++ mechanism
     # @todo : comment in!!!
-#     vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
-#     k = vectors.shape[1]
-#     if vectors is False:
-#         return 1
-#     centroids_indices = initialize_centroids(vectors, k)
-#     if centroids_indices is False:
-#         return 1
-#     if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
-#         return 1
-#     result = mykmeanssp.pythonEntryPoint(k, "spk", "c_input_file.txt", 2)
-#     if result == 0:
-#         print_results(centroids_indices)
-#     finish_run()
-#     return result
+    vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
+    #print("lollllllllllll")
+    #with open('c_output_file.txt', 'r') as f:
+        #print(f.read())
+
+    #print("lollllllllllll")
+    #print(vectors)
+   # print()
+    k = vectors.shape[1]
+    if vectors is False:
+        return 1
+    centroids_indices = initialize_centroids(vectors, k)
+    if centroids_indices is False:
+        return 1
+    if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
+        return 1
+    result = mykmeanssp.pythonEntryPoint(k, "spk", "c_input_file.txt", 2)
+    if result == 0:
+        print_results(centroids_indices)
+    finish_run()
+    return result
 
 
 def get_program_args():

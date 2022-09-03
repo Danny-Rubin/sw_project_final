@@ -1,7 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include "utils.h"
-#include "utils.c"
+#include "executeKmeans.h"
+#include "executeKmeans.c"
 #include "spkmeansmodule.h"
 
 
@@ -32,9 +32,9 @@ Matrix executeLnorm(Matrix vectors);
 
 JacobiRes executeJacobi(Matrix vectors);
 
-void projectMatrixSpk(Matrix vectors, int k);
+void reNormalize(Matrix vectors, int rows, int cols);
 
-void executeKmeans(Matrix vectors);
+void projectMatrixSpk(Matrix vectors, int k);
 
 int PrintData(char ***vec_strs, int rows, int cols);
 
@@ -123,13 +123,15 @@ int cEntryPoint(int k, char *goal, char *fileName, int stage) {
             // @todo: implement and print
             break;
         case 's': /* goal = spk */
+            // printf("started c entry point\n");
             if(stage == 1){/* first stage of spkmeans */
-                // calculates the vectors that will be the input for kmeans++ algorithm:
+                /* calculates the vectors that will be the input for kmeans++ algorithm: */
                 projectMatrixSpk(*matrixPtr, k); // @todo- implement function
                 // @todo: write to file
                 break;
             }
-            executeKmeans(*matrixPtr); /* second stage of spkmeans - actual call to kmeans */ // @todo- implement function
+            // printf("calling k means\n");
+            kmeans(*matrixPtr, k, n_const, d_const); /* second stage of spkmeans - actual call to kmeans */ // @todo- implement function
             // @todo- write to file
             break;
         default:
@@ -551,7 +553,7 @@ Vector getIandJ(Matrix mat, int dim) {
     double largestAbsValue = -1;
     Vector res = allocateVector(2, sizeof(double), True); /* the vector that holds the indices i and j */
     for (a = 0; a < dim; a++) {
-        for (b = 0; b < dim; b++) {
+        for (b = a+1; b < dim; b++) {
             if (a != b && fabs(mat[a][b]) > largestAbsValue) {
                 largestAbsValue = fabs(mat[a][b]);
                 /* assign the indices to i and j respectively: */
@@ -712,41 +714,49 @@ JacobiRes executeJacobi(Matrix vectors) {
     return res;
 }
 
+void reNormalize(Matrix vectors, int rows, int cols){
+    int i = 0, j = 0;
+    double rowNorm = 0.0;
+    for (i = 0; i < rows; i++){
+        rowNorm = norm(vectors[i], cols);
+
+        for (j = 0; j < cols; j++){
+            vectors[i][j] = rowNorm == 0? 0 : vectors[i][j]/rowNorm;
+        }
+    }
+}
+
 void projectMatrixSpk(Matrix vectors, int k) {
     // printf("entered project matrix\n");
     Matrix res = NULL, subMatrix = NULL;
     JacobiRes jacobi = {NULL, NULL};
     res = executeLnorm(vectors);
-//     printf("finished lnorm\n");
-//     printDoubleMatrix(res, n_const, n_const);
+    printf("finished lnorm\n");
+     printDoubleMatrix(res, n_const, n_const);
+     printf("\n\n");
     jacobi = executeJacobi(res);
-//     printf("finished jacobi\n");
-//     printDoubleMatrix(jacobi.eigenVecs, n_const, n_const);
+
+    printf("finished jacobi\n\n");
+    printDoubleMatrix(&jacobi.eigenVals, 1, n_const);
+    printDoubleMatrix(jacobi.eigenVecs, n_const, n_const);
+
+
+    printf("\n\n");
     if (!k){
         k = determineK(jacobi.eigenVals);
         // printf("finished determine k\n");
     }
     subMatrix = getSubMatrix(jacobi, k);
-//     printf("finished getSubMatrix\n");
-//     printDoubleMatrix(subMatrix, n_const, k);
+    printf("finished getSubMatrix\n");
+    printf("SubMatrix\n");
+    printDoubleMatrix(subMatrix, n_const, k);
+    reNormalize(subMatrix, n_const, k);
+    printf("\nnormal SubMmatrix\n");
+    printDoubleMatrix(subMatrix, n_const, k);
+
     writeMatrixToFile(subMatrix, "c_output_file.txt", n_const, k);
 //     printf("finished writeMatrix\n");
     return;
-}
-
-void executeKmeans(Matrix vectors){
-    return;
-}
-
-
-
-
-
-/*
- * This function takes a matrix of N vectors and returns a
- */
-void getVectorsForSPK(Matrix vectors){
-
 }
 
 

@@ -84,6 +84,14 @@ void freeMatrix(Matrix mat, int n) {
     free(mat);
 }
 
+void free_memory_arr(double** arr, int n){
+    int i = 0;
+    for(i = 0; i < n; i++){
+        free(arr[i]);
+    }
+    free(arr);
+}
+
 /* Priniting, writing and formatting: */
 
 void print_error() {
@@ -182,4 +190,13 @@ void printDoubleMatrix(Matrix mat, int rows, int cols) {
     char ***matstr = doubleVecsToStr(mat, rows, cols);
     // printf("in mATSTR %s %s %s %s\n", matstr[0][0],matstr[0][1],matstr[1][0],matstr[1][1]);
     PrintData(matstr, rows, cols);
+}
+
+double norm(Vector vec, int n){
+    int i = 0;
+    double sum = 0;
+    for(i = 0; i < n; i++){
+        sum += pow(vec[i], 2);
+    }
+    return sqrt(sum);
 }
