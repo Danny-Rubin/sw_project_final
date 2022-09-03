@@ -1,57 +1,28 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "utils.h"
+#include "utils.c"
 #include "spkmeansmodule.h"
 
-#define DEBUG 1
+
 #define DEFAULT_MAX_ITER 300
 #define MAX_ROTATIONS 100
 #define EPSILON 0.00001
-#define True 1
-#define False 0
-
 
 
 /* global variables of the program: number of vectors, number of clusters and input vectors dimension */
 
 int n_const = 0;
-int k_const = 0;
 int d_const = 0;
-
-typedef double **Matrix;
-typedef double *Vector;
-typedef struct JacobiRes {
-    Vector eigenVals;
-    Matrix eigenVecs;
-} JacobiRes;
-
-/* linked list for memory management */
-struct node {
-    void *memory;
-    int key;
-    struct node *next;
-};
-
-struct node *memoryListHead = NULL;
-
 
 
 /* function signatures: */
-void freeAllMemory();
-
-void registerPtr(int key, void *memory);
-
-void *allocateVector(int n, size_t elementSize, int shouldRegister);
-
-Matrix allocateMatrix(int rows, int cols, int shouldRegister);
 
 int readData(char *in_file_path, Matrix *vectors);
 
-int writeData(char *out_file, char ***vecStrs, int d, int k);
+void writeMatrixToFile(Matrix vectors, char *outFileName, int rows, int cols);
+
+int determineK(Vector eigenVals);
 
 Matrix executeWam(Matrix vectors);
 
@@ -61,11 +32,9 @@ Matrix executeLnorm(Matrix vectors);
 
 JacobiRes executeJacobi(Matrix vectors);
 
-void executeSpk(Matrix vectors);
+void projectMatrixSpk(Matrix vectors, int k);
 
 void executeKmeans(Matrix vectors);
-
-void printDoubleMatrix(Matrix mat, int rows, int cols);
 
 int PrintData(char ***vec_strs, int rows, int cols);
 
@@ -88,6 +57,9 @@ void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
 void rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 
 Matrix copyOf(Matrix mat, int dim);
+
+Matrix getSubMatrix(JacobiRes jacobi, int k);
+
 
 
 /*
@@ -128,19 +100,19 @@ int cEntryPoint(int k, char *goal, char *fileName, int stage) {
         return 1;
     }
     switch (goal[0]) {
-        case 'w':
+        case 'w': /* goal = wam */
             res = executeWam(*matrixPtr);
             printDoubleMatrix(res, n_const, n_const);
             break;
-        case 'd':
+        case 'd': /* goal = ddg */
             res = executeDdg(*matrixPtr, NULL);
             printDoubleMatrix(res, n_const, n_const);
             break;
-        case 'l':
+        case 'l': /* goal = lnorm */
             res = executeLnorm(*matrixPtr);
             printDoubleMatrix(res, n_const, n_const);
             break;
-        case 'j':
+        case 'j': /* goal = jacobi */
             if (!validateMatrixSymmetric(*matrixPtr, n_const, d_const)) { /* input matrix not symmetric*/
                 print_invalid_input();
                 return 1;
@@ -150,10 +122,10 @@ int cEntryPoint(int k, char *goal, char *fileName, int stage) {
             printDoubleMatrix(jacobiRes.eigenVecs, n_const, n_const);
             // @todo: implement and print
             break;
-        case 's':
+        case 's': /* goal = spk */
             if(stage == 1){/* first stage of spkmeans */
                 // calculates the vectors that will be the input for kmeans++ algorithm:
-                executeSpk(*matrixPtr); // @todo- implement function
+                projectMatrixSpk(*matrixPtr, k); // @todo- implement function
                 // @todo: write to file
                 break;
             }
@@ -183,7 +155,8 @@ int validateGoal(char *goal) {
             strcmp(goal, "ddg") == 0 ||
             strcmp(goal, "lnorm") == 0 ||
             strcmp(goal, "jacobi") == 0 ||
-            strcmp(goal, "wam") == 0
+            strcmp(goal, "wam") == 0 ||
+            strcmp(goal, "spk") == 0
             ) {
         return True;
     }
@@ -205,50 +178,6 @@ int validateMatrixSymmetric(Matrix matrix, int rows, int cols) {
         }
     }
     return True;
-}
-
-/*
- * This function allocates a vector in memory
- * Params:
- * n- vector dimension,
- * elementSize- size of each element in the vector
- * shouldRegister (boolean)- determines if the vector will be saved in the general memory linked list
- */
-void *allocateVector(int n, size_t elementSize, int shouldRegister) {
-    Vector res = (Vector) calloc(n, elementSize);
-    if (!res) {
-        print_error();
-        exit(1);
-    }
-    if (shouldRegister) {
-        registerPtr(0, res);
-    }
-    return res;
-}
-
-/*
- * This function allocates a matrix in memory
- * Params:
- * rows and cols - desired mat dimensions,
- * shouldRegister (boolean)- determines if the matrix will be saved in the general memory linked list
- */
-Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
-    int i = 0;
-    Matrix res = (Matrix) calloc(rows, sizeof(Vector));
-    if (!res) {
-        print_error();
-        exit(1);
-    }
-    if (shouldRegister) {
-        registerPtr(0, res);
-    }
-    for (i = 0; i < rows; i++) {
-        res[i] = allocateVector(cols, sizeof(double), shouldRegister);
-        if (!res[i]) {
-            return NULL;
-        }
-    }
-    return res;
 }
 
 
@@ -291,24 +220,6 @@ Vector getMainDiagonal(Matrix mat) {
         res[i] = mat[i][i];
     }
     return res;
-}
-
-void freeMatrix(Matrix mat, int n) {
-    int i = 0;
-    for (i = 0; i < n; i++) {
-        free(mat[i]);
-    }
-    free(mat);
-}
-
-
-void print_error() {
-    printf("An Error Has Occurred\n");
-}
-
-
-void print_invalid_input() {
-    printf("Invalid Input!\n");
 }
 
 
@@ -541,83 +452,6 @@ int readData(char *in_file_path, Matrix *vectors) {
     return True;
 }
 
-
-int writeData(char *out_file, char ***vecStrs, int d, int k){
-    FILE *fp = NULL;
-    int i = 0; int j = 0;
-
-    fp = fopen(out_file, "w");
-    if (fp ==NULL){
-        if (DEBUG) {
-            printf("error in writeData: fp is null\n");}
-        print_error();
-        return False;
-    }
-    for(i=0; i < k; i++){
-        for(j=0; j <d -1; j++){
-            fprintf(fp, "%s,", vecStrs[i][j]);
-        }
-        fprintf(fp, "%s\n", vecStrs[i][d - 1]);
-    }
-    fclose(fp);
-    return True;
-}
-
-char *doubleToRoundStr(double num) {
-    char *res = allocateVector(400, sizeof(char), True);
-    sprintf(res, "%.4f", num);
-    return res;
-}
-
-/* This function takes a matrix of doubles and converts
-* it to a matrix of strings, formatted to 4 decimal places.
-*/
-char ***doubleVecsToStr(Matrix vectors, int rows, int cols) {
-    char ***res = NULL;
-    int i = 0;
-    int j = 0;
-
-    res = (char ***) calloc(k_const, sizeof(char **));
-    if (res == NULL) {
-        if (DEBUG) {
-            printf("error in doubleVecsToSt: res is null\n");
-        }
-        print_error();
-        return NULL;
-    }
-    registerPtr(0, res);
-    for (i = 0; i < rows; i++) {
-        res[i] = allocateVector(cols, sizeof(char *), True);
-    }
-    for (i = 0; i < rows; i++) {
-        for (j = 0; j < cols; j++) {
-            char *val = doubleToRoundStr(vectors[i][j]);
-            res[i][j] = val;
-        }
-    }
-    return res;
-}
-
-/* This function takes a matrix of numbers as formatted strings and prints
-their value to screen */
-int PrintData(char ***vec_strs, int rows, int cols) {
-    int i = 0;
-    int j = 0;
-    for (i = 0; i < rows; i++) {
-        for (j = 0; j < cols - 1; j++) {
-            printf("%s,", vec_strs[i][j]);
-        }
-        printf("%s\n", vec_strs[i][cols - 1]);
-    }
-    return True;
-}
-
-
-void printDoubleMatrix(Matrix mat, int rows, int cols) {
-    char ***matstr = doubleVecsToStr(mat, rows, cols);
-    PrintData(matstr, rows, cols);
-}
-
 double offSquared(Matrix mat, int n) {
     int i = 0, j = 0;
     double res = 0;
@@ -627,19 +461,12 @@ double offSquared(Matrix mat, int n) {
             if (i != j) {
                 res += pow(mat[i][j], 2);
             }
-
         }
     }
     return res;
 }
 
 int isConvergedJacobi(Matrix mat, Matrix matPrime) {
-//    printf("\n MAT : \n");
-//    printDoubleMatrix(mat,n_const,n_const);
-//    printf("\n MAT prime: \n");
-//    printDoubleMatrix(matPrime,n_const,n_const);
-    // @todo: pud the pudder
-//    printf("\nepsilon: %f \n", offSquared(mat, n_const) - offSquared(matPrime, n_const));
     return (offSquared(mat, n_const) - offSquared(matPrime, n_const) <= EPSILON);
 }
 
@@ -648,6 +475,19 @@ Matrix getIdentityMat(int dim) {
     Matrix res = allocateMatrix(dim, dim, True);
     for (i = 0; i < dim; i++) {
         res[i][i] = 1;
+    }
+    return res;
+}
+
+int determineK(Vector eigenVals){
+    int i = 0, res = 0;
+    double maxDiff = 0.0, currDiff = 0.0;
+    for (i = 0; i < n_const/2 ; i++){
+        currDiff = fabs(eigenVals[i] - eigenVals[i+1]);
+        if (currDiff > maxDiff){
+            maxDiff = currDiff;
+            res = i;
+        }
     }
     return res;
 }
@@ -699,7 +539,7 @@ Matrix executeLnorm(Matrix vectors) {
 }
 
 
-// return rotated mat and mutate cumpum to new cumpum
+/* return rotated mat and update (in place) cumulative p to new cumulative p */
 void doJacobiIteration(Matrix mat, Matrix cumPum);
 
 /*
@@ -707,7 +547,6 @@ void doJacobiIteration(Matrix mat, Matrix cumPum);
  * with the largest absolute value, and returns them in a double pointer
  */
 Vector getIandJ(Matrix mat, int dim) {
-//    printDoubleMatrix(mat, dim, dim);
     int a = 0, b = 0;
     double largestAbsValue = -1;
     Vector res = allocateVector(2, sizeof(double), True); /* the vector that holds the indices i and j */
@@ -721,8 +560,6 @@ Vector getIandJ(Matrix mat, int dim) {
             }
         }
     }
-//    printf("i=%f\n", res[0]);
-//    printf("j=%f\n", res[1]);
     return res;
 }
 
@@ -740,8 +577,6 @@ Vector getCandS(Matrix mat, int i, int j) {
     double s = t * c;
     res[0] = c;
     res[1] = s;
-//    printf("c=%f\n", res[0]);
-//    printf("s=%f\n", res[1]);
     return res;
 }
 
@@ -795,7 +630,7 @@ void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s) {
     for (count = 0; count < dim; count++) {
         cumPum[count][j] = (s * copy[count][i]) + (c * copy[count][j]);
     }
-    freeMatrix(copy, dim); // ###
+    freeMatrix(copy, dim);
 }
 
 /*
@@ -810,18 +645,57 @@ void copyInPlace(Matrix mat, Matrix copiedMat, int dim) {
     }
 }
 
+/* swaps two ints */
+void swap(int *xp, int *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+/* return vector of indices sorted by decreasing order of keys vector */
+int* getSortedIndices(Vector keys ){
+    int i = 0, j = 0;
+    int* indices = allocateVector(n_const, sizeof (int), True);
+    for (i = 0; i < n_const; i++){
+        indices[i] = i;
+    }
+    for (i = 0; i < n_const; i++){ /* stable bubble sort */
+        for (j = 0; j < n_const - 1; j++){
+            if (keys[(int)indices[j]] < keys[(int)indices[j+1]]){
+                swap((int*) &indices[j], (int*) &indices[j+1]);
+            }
+        }
+    }
+    return indices;
+}
+
+Matrix getSubMatrix(JacobiRes jacobi, int k){
+    int i = 0, j = 0;
+    Matrix res = allocateMatrix(n_const, k, True);
+    int * sortedIndices = getSortedIndices(jacobi.eigenVals);
+    // printf("finished sort");
+    for (i = 0; i < n_const ; i++){
+        for (j = 0; j < k; j++){
+            res[i][j] = jacobi.eigenVecs[i][sortedIndices[j]];
+            // printf("res i j = %f\n", res[i][j]);
+        }
+    }
+    return res;
+}
+
+
+
 
 JacobiRes executeJacobi(Matrix vectors) {
     int i = 0;
     int rotations_converged = (offSquared(vectors, n_const) == 0); /* determines if mat is diagonal */
     JacobiRes res = {.eigenVals = NULL, .eigenVecs = NULL}; // todo watch this for merrors
     Matrix A = vectors;
-//    printf("\n A : \n");
-//    printDoubleMatrix(A,n_const,n_const);
     Matrix A_prime = copyOf(A, n_const);
     registerPtr(0, A_prime);
     Matrix cumPum = getIdentityMat(n_const);
-    // main loop:
+    /* main loop: */
     for (i = 0; i < MAX_ROTATIONS && !rotations_converged; i++) {
         // printf("\n%d\n", i);
         doJacobiIteration(A_prime, cumPum);
@@ -838,7 +712,25 @@ JacobiRes executeJacobi(Matrix vectors) {
     return res;
 }
 
-void executeSpk(Matrix vectors) {
+void projectMatrixSpk(Matrix vectors, int k) {
+    // printf("entered project matrix\n");
+    Matrix res = NULL, subMatrix = NULL;
+    JacobiRes jacobi = {NULL, NULL};
+    res = executeLnorm(vectors);
+//     printf("finished lnorm\n");
+//     printDoubleMatrix(res, n_const, n_const);
+    jacobi = executeJacobi(res);
+//     printf("finished jacobi\n");
+//     printDoubleMatrix(jacobi.eigenVecs, n_const, n_const);
+    if (!k){
+        k = determineK(jacobi.eigenVals);
+        // printf("finished determine k\n");
+    }
+    subMatrix = getSubMatrix(jacobi, k);
+//     printf("finished getSubMatrix\n");
+//     printDoubleMatrix(subMatrix, n_const, k);
+    writeMatrixToFile(subMatrix, "c_output_file.txt", n_const, k);
+//     printf("finished writeMatrix\n");
     return;
 }
 
@@ -846,47 +738,17 @@ void executeKmeans(Matrix vectors){
     return;
 }
 
+
+
+
+
 /*
  * This function takes a matrix of N vectors and returns a
  */
 void getVectorsForSPK(Matrix vectors){
 
 }
-/*
- * This matrix takes a matrix of vectors and a matrix of centroids (initialized by the
- */
-// @todo- complete function from previous project
-int kmeans(int k, Matrix vectors, Matrix centroids) {
-    return 0;
-}
 
-
-/* Memory management: */
-
-
-/* add memory ptr at first position at list */
-void registerPtr(int key, void *memory) {
-    struct node *link = (struct node *) malloc(sizeof(struct node));
-    if (!link) { freeAllMemory(memoryListHead); }
-    link->key = key;
-    link->memory = memory;
-    link->next = memoryListHead;
-    memoryListHead = link;
-    memoryListHead = link;
-}
-
-
-void freeAllMemory() {
-    struct node *tmp;
-
-    while (memoryListHead != NULL) {
-        tmp = memoryListHead;
-        memoryListHead = memoryListHead->next;
-        free(tmp->memory); /* free memory */
-        free(tmp); /* free list link  */
-    }
-    // system("leaks executablename");
-}
 
 /* Python module functions */
 static PyMethodDef capi_methods[] = {

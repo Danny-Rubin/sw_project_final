@@ -105,20 +105,21 @@ def main():
         finish_run()
         return result
     # call the kmeans ++ mechanism
-    vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
-    k = vectors.shape[1]
-    if vectors is False:
-        return 1
-    centroids_indices = initialize_centroids(vectors, k)
-    if centroids_indices is False:
-        return 1
-    if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
-        return 1
-    result = mykmeanssp.pythonEntryPoint(k, "spk", "c_input_file.txt", 2)
-    if result == 0:
-        print_results(centroids_indices)
-    finish_run()
-    return result
+    # @todo : comment in!!!
+#     vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
+#     k = vectors.shape[1]
+#     if vectors is False:
+#         return 1
+#     centroids_indices = initialize_centroids(vectors, k)
+#     if centroids_indices is False:
+#         return 1
+#     if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
+#         return 1
+#     result = mykmeanssp.pythonEntryPoint(k, "spk", "c_input_file.txt", 2)
+#     if result == 0:
+#         print_results(centroids_indices)
+#     finish_run()
+#     return result
 
 
 def get_program_args():
