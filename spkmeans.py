@@ -106,6 +106,7 @@ def main():
         return result
     # call the kmeans ++ mechanism
     vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
+    k = vectors.shape[1]
     if vectors is False:
         return 1
     centroids_indices = initialize_centroids(vectors, k)
