@@ -1,0 +1,66 @@
+./spkmeans wam tests/test_jacobi_2_input.txt
+
+./spkmeans wam tests/test_jacobi_3_input.txt
+
+./spkmeans wam tests/test_jacobi_4_input.txt
+
+./spkmeans wam tests/test_jacobi_5_input.txt
+
+./spkmeans wam tests/test_jacobi_6_input.txt
+
+./spkmeans wam tests/test_jacobi_lecture_13_input.txt
+
+./spkmeans wam tests/test_wam_1_input.txt
+
+./spkmeans wam tests/test_wam_2_input.txt
+
+./spkmeans wam tests/test_wam_3_input.txt
+
+./spkmeans ddg tests/test_jacobi_2_input.txt
+
+./spkmeans ddg tests/test_jacobi_3_input.txt
+
+./spkmeans ddg tests/test_jacobi_4_input.txt
+
+./spkmeans ddg tests/test_jacobi_5_input.txt
+
+./spkmeans ddg tests/test_jacobi_6_input.txt
+
+./spkmeans ddg tests/test_jacobi_lecture_13_input.txt
+
+./spkmeans ddg tests/test_wam_1_input.txt
+
+./spkmeans ddg tests/test_wam_2_input.txt
+
+./spkmeans ddg tests/test_wam_3_input.txt
+
+./spkmeans lnorm tests/test_jacobi_2_input.txt
+
+./spkmeans lnorm tests/test_jacobi_3_input.txt
+
+./spkmeans lnorm tests/test_jacobi_4_input.txt
+
+./spkmeans lnorm tests/test_jacobi_5_input.txt
+
+./spkmeans lnorm tests/test_jacobi_6_input.txt
+
+./spkmeans lnorm tests/test_jacobi_lecture_13_input.txt
+
+./spkmeans lnorm tests/test_wam_1_input.txt
+
+./spkmeans lnorm tests/test_wam_2_input.txt
+
+./spkmeans lnorm tests/test_wam_3_input.txt
+
+./spkmeans jacobi tests/test_jacobi_2_input.txt
+
+./spkmeans jacobi tests/test_jacobi_3_input.txt
+
+./spkmeans jacobi tests/test_jacobi_4_input.txt
+
+./spkmeans jacobi tests/test_jacobi_5_input.txt
+
+./spkmeans jacobi tests/test_jacobi_6_input.txt
+
+./spkmeans jacobi tests/test_jacobi_lecture_13_input.txt
+
