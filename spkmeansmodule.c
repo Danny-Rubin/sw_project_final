@@ -97,14 +97,15 @@ Matrix copyOf(Matrix mat, int dim);
  * what it does: call general entry point after converting python args
  */
 static PyObject* pythonEntryPoint(PyObject *self, PyObject *args){
-    int k = 0, res = 0;
+    int k = 0, res = 0, stage =0;
     char *goal;
     char* fileName;
 
-    if(!PyArg_ParseTuple(args, "iss", &k, &goal, &fileName)){
+    if(!PyArg_ParseTuple(args, "issi", &k, &goal, &fileName, &stage)){
         return  NULL;
     }
-    return cEntryPoint(k, goal, fileName);
+    res = cEntryPoint(k, goal, fileName, stage);
+    return Py_BuildValue("i", res);
 }
 
 
@@ -113,7 +114,7 @@ static PyObject* pythonEntryPoint(PyObject *self, PyObject *args){
  * params: filename, k, goal
  * what it does: reads input file and calls appropriate execution function and then print to screen result
  */
-int cEntryPoint(int k, char *goal, char *fileName) {
+int cEntryPoint(int k, char *goal, char *fileName, int stage) {
     Matrix *matrixPtr = allocateVector(1, sizeof(Matrix), True);
     JacobiRes jacobiRes;
     Matrix res = NULL;
@@ -150,12 +151,13 @@ int cEntryPoint(int k, char *goal, char *fileName) {
             // @todo: implement and print
             break;
         case 's':
-            // calculates the vectors that will be the input for kmeans++ algorithm:
-            executeSpk(*matrixPtr); // @todo- implement function
-            // @todo: write to file
-            break;
-        case 'k':
-            executeKmeans(*matrixPtr); // @todo- implement function
+            if(stage == 1){/* first stage of spkmeans */
+                // calculates the vectors that will be the input for kmeans++ algorithm:
+                executeSpk(*matrixPtr); // @todo- implement function
+                // @todo: write to file
+                break;
+            }
+            executeKmeans(*matrixPtr); /* second stage of spkmeans - actual call to kmeans */ // @todo- implement function
             // @todo- write to file
             break;
         default:
@@ -837,6 +839,10 @@ JacobiRes executeJacobi(Matrix vectors) {
 }
 
 void executeSpk(Matrix vectors) {
+    return;
+}
+
+void executeKmeans(Matrix vectors){
     return;
 }
 

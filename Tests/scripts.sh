@@ -15,7 +15,7 @@ function run_ddg() {
 function run_lnorm() {
   echo "\nrunning: lnorm\n"
   gcc -o c_executable ../spkmeans.c ../spkmeansmodule.c
-  leaks --atExit --list -- ./c_executable lnorm ./example_jacobi.txt | grep ".+leaks for"
+  leaks --atExit --list -- ./c_executable lnorm ./example_jacobi.txt | grep "^Process"
   # cat outpudpudpud.txt
 }
 
