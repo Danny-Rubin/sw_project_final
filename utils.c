@@ -10,10 +10,9 @@ struct node *memoryListHead = NULL;
 
 
 /* add memory ptr at first position at list */
-void registerPtr(int key, void *memory) {
+void registerPtr(void *memory) {
     struct node *link = (struct node *) malloc(sizeof(struct node));
     if (!link) { freeAllMemory(memoryListHead); }
-    link->key = key;
     link->memory = memory;
     link->next = memoryListHead;
     memoryListHead = link;
@@ -46,7 +45,7 @@ void *allocateVector(int n, size_t elementSize, int shouldRegister) {
         exit(1);
     }
     if (shouldRegister) {
-        registerPtr(0, res);
+        registerPtr(res);
     }
     return res;
 }
@@ -65,7 +64,7 @@ Matrix allocateMatrix(int rows, int cols, int shouldRegister) {
         exit(1);
     }
     if (shouldRegister) {
-        registerPtr(0, res);
+        registerPtr(res);
     }
     for (i = 0; i < rows; i++) {
         res[i] = allocateVector(cols, sizeof(double), shouldRegister);
@@ -147,7 +146,7 @@ char ***doubleVecsToStr(Matrix vectors, int rows, int cols) {
         print_error();
         exit(1);
     }
-    registerPtr(0, res);
+    registerPtr(res);
     for (i = 0; i < rows; i++) {
         res[i] = allocateVector(cols, sizeof(char *), True);
     }

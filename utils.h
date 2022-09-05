@@ -21,7 +21,6 @@ typedef struct JacobiRes {
 
 struct node {
     void *memory;
-    int key;
     struct node *next;
 };
 
@@ -33,7 +32,7 @@ void print_error();
 
 void print_invalid_input();
 
-void registerPtr(int key, void *memory);
+void registerPtr(void *memory);
 
 void *allocateVector(int n, size_t elementSize, int shouldRegister);
 

@@ -1,2 +1,10 @@
 /mykmeanssp.cpython-38-darwin.so
 /cmake-build-debug/
+/Tests/c_executable
+/build/lib.macosx-10.14-arm64-3.8/mykmeanssp.cpython-38-darwin.so
+/comparator/build/lib.macosx-10.14-arm64-3.8/mykmeanssp.cpython-38-darwin.so
+/comparator/mykmeanssp.cpython-38-darwin.so
+/comparator/build/temp.macosx-10.14-arm64-3.8/spkmeans.o
+/build/temp.macosx-10.14-arm64-3.8/spkmeansmodule.o
+/comparator/build/temp.macosx-10.14-arm64-3.8/spkmeansmodule.o
+/Tests/tsibout.txt

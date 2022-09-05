@@ -341,7 +341,7 @@ int *getLinesLengths(int num_lines, char *filename) {
         print_error();
         return NULL;
     }
-    registerPtr(0, linesLengths);
+    registerPtr(linesLengths);
     for (i = 0; i < num_lines; i++) {
         c = 0;
         line_len = 1;
@@ -408,7 +408,7 @@ int readData(char *in_file_path, Matrix *vectors) {
         return False;
     }
     *vectors = (double **) calloc(n_const, sizeof(double *));
-    registerPtr(0, *vectors);
+    registerPtr(*vectors);
     if (*vectors == NULL) {
         if (DEBUG == 1) {
             printf("in 'readData', *vectors == NULL");
@@ -695,18 +695,13 @@ JacobiRes executeJacobi(Matrix vectors) {
     JacobiRes res = {.eigenVals = NULL, .eigenVecs = NULL}; // todo watch this for merrors
     Matrix A = vectors;
     Matrix A_prime = copyOf(A, n_const);
-    registerPtr(0, A_prime);
+    registerPtr(A_prime);
     Matrix cumPum = getIdentityMat(n_const);
     /* main loop: */
     for (i = 0; i < MAX_ROTATIONS && !rotations_converged; i++) {
-        // printf("\n%d\n", i);
         doJacobiIteration(A_prime, cumPum);
         rotations_converged = isConvergedJacobi(A, A_prime);
         copyInPlace(A, A_prime, n_const);
-        // printf("\nA prime:\n");
-//        printf("\n A prime: \n");
-//        printDoubleMatrix(A_prime,n_const,n_const);
-//        printf("\n\n");
     }
     res.eigenVals = getMainDiagonal(A_prime);
     res.eigenVecs = cumPum;
