@@ -128,9 +128,10 @@ def main():
     #print("lollllllllllll")
     #print(vectors)
    # print()
-    k = vectors.shape[1]
     if vectors is False:
         return 1
+    k = vectors.shape[1]
+
     centroids_indices = initialize_centroids(vectors, k)
     if centroids_indices is False:
         return 1

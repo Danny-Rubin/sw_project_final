@@ -61,6 +61,11 @@ function pythonInterface() {
     python3 spkmeans.py 3 spk /Users/drubinov/Downloads/sw_project_final/Tests/input6.txt
     echo "run spk python input 7: \n"
     python3 spkmeans.py 3 spk /Users/drubinov/Downloads/sw_project_final/Tests/input7.txt
+    echo "#################################################"
+    echo "run spk python input 2 for k = 0: \n"
+    python3 spkmeans.py 0 spk /Users/drubinov/Downloads/sw_project_final/Tests/input2.txt
+    echo "run spk python input 7 for k = 0: \n"
+    python3 spkmeans.py 0 spk /Users/drubinov/Downloads/sw_project_final/Tests/input7.txt
 
 
 
