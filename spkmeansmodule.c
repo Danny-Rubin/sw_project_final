@@ -124,16 +124,13 @@ int cEntryPoint(int k, char *goal, char *fileName, int stage) {
             // @todo: implement and print
             break;
         case 's': /* goal = spk */
-            // printf("started c entry point\n");
             if(stage == 1){/* first stage of spkmeans */
                 /* calculates the vectors that will be the input for kmeans++ algorithm: */
                 projectMatrixSpk(*matrixPtr, k); // @todo- implement function
                 // @todo: write to file
                 break;
             }
-            // printf("calling k means\n");
-            kmeans(*matrixPtr, k, n_const, d_const); /* second stage of spkmeans - actual call to kmeans */ // @todo- implement function
-            // @todo- write to file
+            kmeans(*matrixPtr, k, n_const, d_const); /* second stage of spkmeans - actual call to kmeans */
             break;
         default:
             print_error();
@@ -578,7 +575,7 @@ Vector getIandJ(Matrix mat, int dim) {
 Vector getCandS(Matrix mat, int i, int j) {
     Vector res = allocateVector(2, sizeof(double), True);
 
-    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]); // Todo: handle mat[i][j] = 0
+    double theta = (mat[j][j] - mat[i][i]) / (2 * mat[i][j]);
     double signTheta = theta < 0 ? -1 : 1;
     double t = signTheta / (fabs(theta) + sqrt(pow(theta, 2) + 1));
     double c = 1.0 / sqrt(pow(t, 2) + 1);
@@ -682,11 +679,9 @@ Matrix getSubMatrix(JacobiRes jacobi, int k){
     int i = 0, j = 0;
     Matrix res = allocateMatrix(n_const, k, True);
     int * sortedIndices = getSortedIndices(jacobi.eigenVals);
-    // printf("finished sort");
     for (i = 0; i < n_const ; i++){
         for (j = 0; j < k; j++){
             res[i][j] = jacobi.eigenVecs[i][sortedIndices[j]];
-            // printf("res i j = %f\n", res[i][j]);
         }
     }
     return res;
@@ -711,7 +706,6 @@ JacobiRes executeJacobi(Matrix vectors) {
     }
     res.eigenVals = getMainDiagonal(A_prime);
     res.eigenVecs = cumPum;
-    // freeMatrix(A_prime, n_const);
     return res;
 }
 
@@ -728,35 +722,17 @@ void reNormalize(Matrix vectors, int rows, int cols){
 }
 
 void projectMatrixSpk(Matrix vectors, int k) {
-    // printf("entered project matrix\n");
     Matrix res = NULL, subMatrix = NULL;
     JacobiRes jacobi = {NULL, NULL};
     res = executeLnorm(vectors);
-    printf("finished lnorm\n");
-     printDoubleMatrix(res, n_const, n_const);
-     printf("\n\n");
     jacobi = executeJacobi(res);
-
-    printf("finished jacobi\n\n");
-    printDoubleMatrix(&jacobi.eigenVals, 1, n_const);
-    printDoubleMatrix(jacobi.eigenVecs, n_const, n_const);
-
-
-    printf("\n\n");
     if (!k){
         k = determineK(jacobi.eigenVals);
-        // printf("finished determine k\n");
     }
     subMatrix = getSubMatrix(jacobi, k);
-    printf("finished getSubMatrix\n");
-    printf("SubMatrix\n");
-    printDoubleMatrix(subMatrix, n_const, k);
     reNormalize(subMatrix, n_const, k);
-    printf("\nnormal SubMmatrix\n");
     printDoubleMatrix(subMatrix, n_const, k);
-
     writeMatrixToFile(subMatrix, "c_output_file.txt", n_const, k);
-//     printf("finished writeMatrix\n");
     return;
 }
 
