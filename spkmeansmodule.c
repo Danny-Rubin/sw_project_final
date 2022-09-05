@@ -52,7 +52,7 @@ Vector getIandJ(Matrix mat, int dim);
 
 Vector getCandS(Matrix mat, int i, int j);
 
-void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s);
+void updateCumP(Matrix cumP, int dim, int i, int j, double c, double s);
 
 void rotateMat(Matrix mat, int dim, int i, int j, double c, double s);
 
@@ -94,13 +94,12 @@ int cEntryPoint(int k, char *goal, char *fileName, int stage) {
     JacobiRes jacobiRes;
     Matrix res = NULL;
     atexit(freeAllMemory);
-
-    if (!validateGoal(goal)) {
-        print_invalid_input();
-        return 1;
-    }
     if (!readData(fileName, matrixPtr)) {
         return 1;
+    }
+    if (k >= n_const || !validateGoal(goal)) {
+        print_invalid_input();
+        exit(1);
     }
     switch (goal[0]) {
         case 'w': /* goal = wam */
@@ -492,7 +491,7 @@ int determineK(Vector eigenVals){
         currDiff = fabs(eigenVals[SortedIndices[i]] - eigenVals[SortedIndices[i+1]]);
         if (currDiff > maxDiff){
             maxDiff = currDiff;
-            res = SortedIndices[i];
+            res = SortedIndices[i] + 1;
         }
     }
     return res;
@@ -621,20 +620,20 @@ void doJacobiIteration(Matrix mat, Matrix cumPum) {
     Vector cAndS = getCandS(mat, i, j);
     c = cAndS[0];
     s = cAndS[1];
-    updateCumpum(cumPum, n_const, i, j, c, s);
+    updateCumP(cumPum, n_const, i, j, c, s);
     rotateMat(mat, n_const, i, j, c, s);
     return;
 }
 
 /* updates by mutation cumulative multiplication of P's */
-void updateCumpum(Matrix cumPum, int dim, int i, int j, double c, double s) {
+void updateCumP(Matrix cumP, int dim, int i, int j, double c, double s) {
     int count = 0;
-    Matrix copy = copyOf(cumPum, dim);
+    Matrix copy = copyOf(cumP, dim);
     for (count = 0; count < dim; count++) {
-        cumPum[count][i] = (c * copy[count][i]) - (s * copy[count][j]);
+        cumP[count][i] = (c * copy[count][i]) - (s * copy[count][j]);
     }
     for (count = 0; count < dim; count++) {
-        cumPum[count][j] = (s * copy[count][i]) + (c * copy[count][j]);
+        cumP[count][j] = (s * copy[count][i]) + (c * copy[count][j]);
     }
     freeMatrix(copy, dim);
 }
