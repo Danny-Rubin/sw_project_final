@@ -39,7 +39,10 @@ def initialize_centroids(vectors: np.ndarray, k: int):
             for l in range(N):
                 d = [np.square(np.linalg.norm(vectors[l] - vectors[centroids_indices[j]])) for j in range(i)]
                 dists[l] = np.min(d)
-            probs = dists / np.sum(dists)
+            sum_dists = np.sum(dists)
+            if sum_dists == 0:
+                raise Exception("sum_dist is zero")
+            probs = dists / sum_dists
             centroids_indices[i] = np.random.choice(N, p=probs)
         #print("centroids_indices:")
         #print(centroids_indices)
@@ -119,15 +122,7 @@ def main():
         finish_run()
         return result
     # call the kmeans ++ mechanism
-    # @todo : comment in!!!
     vectors = read_data("c_output_file.txt")  # get ndarray of input vectors, sorted by index
-    #print("lollllllllllll")
-    #with open('c_output_file.txt', 'r') as f:
-        #print(f.read())
-
-    #print("lollllllllllll")
-    #print(vectors)
-   # print()
     if vectors is False:
         return 1
     k = vectors.shape[1]
@@ -138,8 +133,8 @@ def main():
     if not create_c_input(vectors, centroids_indices):  # write to txt file list of vectors s.t first k vectors are init vectors
         return 1
     result = mykmeanssp.pythonEntryPoint(k, "spk", "c_input_file.txt", 2)
-    if result == 0:
-        print_results(centroids_indices)
+    if result == 0 and not print_results(centroids_indices):
+        return 1
     finish_run()
     return result
 

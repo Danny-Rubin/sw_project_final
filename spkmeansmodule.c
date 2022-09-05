@@ -89,7 +89,6 @@ static PyObject* pythonEntryPoint(PyObject *self, PyObject *args){
  * what it does: reads input file and calls appropriate execution function and then print to screen result
  */
 int cEntryPoint(int k, char *goal, char *fileName, int stage) {
-    printf("\nMarker - c entry\n");
     Matrix *matrixPtr = allocateVector(1, sizeof(Matrix), True);
     JacobiRes jacobiRes;
     Matrix res = NULL;
@@ -485,13 +484,17 @@ Matrix getIdentityMat(int dim) {
 
 int determineK(Vector eigenVals){
     int i = 0, res = 0;
+    Vector sortedEigenVals = allocateVector(n_const, sizeof(double), True);
     int* SortedIndices = getSortedIndices(eigenVals);
+    for (i = 0; i < n_const; i++){
+        sortedEigenVals[i] = eigenVals[SortedIndices[i]];
+    }
     double maxDiff = 0.0, currDiff = 0.0;
     for (i = 0; i < n_const/2 ; i++){
-        currDiff = fabs(eigenVals[SortedIndices[i]] - eigenVals[SortedIndices[i+1]]);
+        currDiff = fabs(sortedEigenVals[i] - sortedEigenVals[i+1]);
         if (currDiff > maxDiff){
             maxDiff = currDiff;
-            res = SortedIndices[i] + 1;
+            res = i + 1;
         }
     }
     return res;

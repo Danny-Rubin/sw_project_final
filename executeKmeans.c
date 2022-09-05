@@ -182,6 +182,8 @@ int kmeans(Matrix vectors, int k, int N, int d) {
         }
 
         reset(clust_sums, clust_sizes, k, d);
+//        printf("ITERATION %d CENTROIDS: \n", i);
+//        printDoubleMatrix(centroids, k, d);
     }
 
     centroids_strs = doubleVecsToStr(centroids, d,k);
