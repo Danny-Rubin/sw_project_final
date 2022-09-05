@@ -9,7 +9,7 @@
 #define DEBUG 1
 #define True 1
 #define False 0
-#define MAX_ITER 300
+#define MAX_ITER 3000
 
 typedef double **Matrix;
 typedef double *Vector;

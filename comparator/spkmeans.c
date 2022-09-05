@@ -1017,6 +1017,7 @@ double **k_means(vector *datapoints, int k, int max_iter, double epsilon, int n,
         }
         iter++;
     }
+    printf("ITERATION UNTIL CONVERGENCE %d  \n", iter);
     res = (double **) calloc(k, sizeof(double *));
     /* res is going to hold the final centroids to be outputted */
     if (res == NULL) {

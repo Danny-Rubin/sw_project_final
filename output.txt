@@ -1,5 +1,5 @@
 test run on: 
-2022-09-05 22:59:31
+2022-09-05 23:46:23
 run all python interface: 
 
 remove shitty old build... 
@@ -55,6 +55,7 @@ normal SubMmatrix
 0.0000,1.0000,0.0000
 0.0000,-1.0000,0.0000
 0.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 2: 
 
 5,9,8
@@ -118,6 +119,7 @@ normal SubMmatrix
 0.0000,0.0000,0.0000
 0.0000,-1.0000,0.0000
 0.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 3: 
 
 4,2,5
@@ -161,6 +163,7 @@ normal SubMmatrix
 0.0000,0.0000,0.0000
 0.0000,0.0000,0.0000
 -0.9885,-0.1511,-0.0001
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 4: 
 
 4,2,3
@@ -200,6 +203,7 @@ normal SubMmatrix
 0.0000,1.0000,0.0000
 0.0000,0.0000,1.0000
 0.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 5: 
 
 5,9,10
@@ -263,6 +267,7 @@ normal SubMmatrix
 1.0000,0.0000,0.0000
 0.0000,0.0000,1.0000
 -1.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 6: 
 
 4,3,5
@@ -310,6 +315,7 @@ normal SubMmatrix
 -0.0464,-0.1317,0.9902
 0.2546,0.9590,-0.1244
 -0.2296,-0.9129,-0.3373
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 7: 
 
 4,3,2
@@ -353,6 +359,7 @@ normal SubMmatrix
 0.0000,1.0000,-0.0001
 0.0000,-1.0000,-0.0001
 0.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 #################################################
 run spk python input 2 for k = 0: 
 
@@ -416,6 +423,7 @@ normal SubMmatrix
 0.0000,0.0000
 0.0000,-1.0000
 0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python input 7 for k = 0: 
 
 4
@@ -457,6 +465,7 @@ normal SubMmatrix
 0.0000
 0.0000
 0.0000
+ITERATION UNTIL CONVERGENCE 3000  
 run spk python NOA GABI for k = 3: 
 
 4,3,2
@@ -500,3 +509,4 @@ normal SubMmatrix
 0.0000,1.0000,-0.0001
 0.0000,-1.0000,-0.0001
 0.0000,0.0000,0.0000
+ITERATION UNTIL CONVERGENCE 3000  
