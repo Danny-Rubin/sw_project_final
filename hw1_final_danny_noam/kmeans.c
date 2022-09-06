@@ -199,6 +199,7 @@ int *getLinesLengths(int num_lines, char *filename){
     linesLengths = (int *)calloc(num_lines,sizeof(int));
     fp = fopen(filename, "r");
     if (fp == NULL){
+
         if (DEBUG == 1){
             printf("in 'getLinesLengths', fp is null\n");
         }

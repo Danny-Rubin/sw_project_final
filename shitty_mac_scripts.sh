@@ -1,7 +1,8 @@
 function run_wam() {
   echo "\nrunning: _wam\n"
-  gcc -o c_executable ../spkmeans.c ../spkmeansmodule.c
-  leaks --atExit --list -- ./c_executable wam ./example_jacobi.txt | grep "^Process"
+  gcc -ansi -Wall -Wextra -Werror -pedantic-errors spkmeans.c executeKmeans.c utils.c -lm -o spkmeans
+  ./spkmeans wam ./example_jacobi.txt
+  leaks --atExit --list -- ./spkmeans wam ./example_jacobi.txt | grep "^Process"
   # cat outpudpudpud.txt
 }
 

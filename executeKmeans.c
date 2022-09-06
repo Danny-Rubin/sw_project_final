@@ -1,5 +1,4 @@
 #include "utils.h"
-#include "utils.c"
 
 /*returns **squared** distance between two vectors */
 double distance_sq(double *vector, double *other_vector, int d){
@@ -182,8 +181,6 @@ int kmeans(Matrix vectors, int k, int N, int d) {
         }
 
         reset(clust_sums, clust_sizes, k, d);
-//        printf("ITERATION %d CENTROIDS: \n", i);
-//        printDoubleMatrix(centroids, k, d);
     }
 
     centroids_strs = doubleVecsToStr(centroids, d,k);
